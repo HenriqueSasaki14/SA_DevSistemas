@@ -7,7 +7,11 @@
       "Read(//c/Users/guilherme_wr_silva/Documents/prompt/**)",
       "Bash(Get-ChildItem -Recurse -Path \"c:\\\\Users\\\\guilherme_wr_silva\\\\Documents\\\\SA_DevSistemas-feature-login-cadastro\" -Filter \"*.jsx\" -ErrorAction SilentlyContinue)",
       "Bash(Select-Object FullName)",
-      "PowerShell(Copy-Item \"c:\\\\Users\\\\guilherme_wr_silva\\\\Documents\\\\SA_DevSistemas-feature-login-cadastro\\\\React\\\\src\\\\HomePage.css\" \"c:\\\\Users\\\\guilherme_wr_silva\\\\Documents\\\\SA_DevSistemas-feature-login-cadastro\\\\React\\\\src\\\\pages\\\\HomePage.css\")"
+      "PowerShell(Copy-Item \"c:\\\\Users\\\\guilherme_wr_silva\\\\Documents\\\\SA_DevSistemas-feature-login-cadastro\\\\React\\\\src\\\\HomePage.css\" \"c:\\\\Users\\\\guilherme_wr_silva\\\\Documents\\\\SA_DevSistemas-feature-login-cadastro\\\\React\\\\src\\\\pages\\\\HomePage.css\")",
+      "Bash(npm run *)",
+      "Bash(mkdir -p c:/SchoolProjects/SA_DevSistemas/backend)",
+      "Bash(npm init *)",
+      "Bash(npm start *)"
     ]
   }
 }
