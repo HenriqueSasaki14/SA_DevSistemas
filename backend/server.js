@@ -5,23 +5,39 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const db = require('./db')
 
+const JWT_SECRET = process.env.JWT_SECRET
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+if (!JWT_SECRET) {
+  console.error('JWT_SECRET não definido. Copie backend/.env.example para backend/.env')
+  process.exit(1)
+}
+
+function gerarToken(usuario) {
+  return jwt.sign({ id: usuario.id, email: usuario.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+}
+
 const app = express()
 app.use(cors({ origin: 'http://localhost:5173' }))
 app.use(express.json())
 
 // ── Middleware: verifica o token JWT ──────────────────────────────
 function autenticar(req, res, next) {
-  const authHeader = req.headers.authorization
-  if (!authHeader) return res.status(401).json({ erro: 'Token não enviado' })
+  const [tipo, token] = (req.headers.authorization || '').split(' ')
+  if (tipo !== 'Bearer' || !token) return res.status(401).json({ erro: 'Token não enviado' })
 
-  const token = authHeader.split(' ')[1]
+  let dados
   try {
-    const dados = jwt.verify(token, process.env.JWT_SECRET)
-    req.usuario = dados
-    next()
-  } catch {
-    res.status(401).json({ erro: 'Token inválido' })
+    dados = jwt.verify(token, JWT_SECRET)
+  } catch (err) {
+    const erro = err.name === 'TokenExpiredError' ? 'Sessão expirada, faça login novamente' : 'Token inválido'
+    return res.status(401).json({ erro })
   }
+
+  const usuario = db.prepare('SELECT id, nome, email FROM usuarios WHERE id = ?').get(dados.id)
+  if (!usuario) return res.status(401).json({ erro: 'Usuário não encontrado' })
+
+  req.usuario = usuario
+  next()
 }
 
 // ── POST /api/auth/cadastro ───────────────────────────────────────
@@ -40,11 +56,7 @@ app.post('/api/auth/register', async (req, res) => {
     'INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)'
   ).run(nome, email, senhaCriptografada)
 
-  const token = jwt.sign(
-    { id: resultado.lastInsertRowid, email },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  )
+  const token = gerarToken({ id: resultado.lastInsertRowid, email })
 
   res.status(201).json({ token, usuario: { id: resultado.lastInsertRowid, nome, email } })
 })
@@ -64,20 +76,14 @@ app.post('/api/auth/login', async (req, res) => {
   if (!senhaCorreta)
     return res.status(401).json({ erro: 'E-mail ou senha incorretos' })
 
-  const token = jwt.sign(
-    { id: usuario.id, email: usuario.email },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  )
+  const token = gerarToken(usuario)
 
   res.json({ token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email } })
 })
 
 // ── GET /api/me ───────────────────────────────────────────────────
 app.get('/api/me', autenticar, (req, res) => {
-  const usuario = db.prepare('SELECT id, nome, email FROM usuarios WHERE id = ?').get(req.usuario.id)
-  if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado' })
-  res.json(usuario)
+  res.json(req.usuario)
 })
 
 // ── GET /api/dashboard ───────────────────────────────────────────
