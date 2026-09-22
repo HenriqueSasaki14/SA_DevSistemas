@@ -1,5 +1,5 @@
 require('dotenv').config();
-const sequelize = require('./db');
+const sequelize = require('./sequelize');
 
 // Importa todos os models
 require('./models/usuarios');
