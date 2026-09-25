@@ -5,6 +5,7 @@ import logo from '../assets/1.png'
 import { api } from '../services/api'
 import { useAuth } from '../contexts/auth-context'
 import Skeleton from '../components/ui/Skeleton'
+import ValorAnimado from '../components/ui/ValorAnimado'
 
 function saudacao() {
   const h = new Date().getHours()
@@ -35,34 +36,47 @@ export default function HomePage() {
 
   const [dashboard,  setDashboard]  = useState(null)
   const [transacoes, setTransacoes] = useState([])
-  const [carregando, setCarregando] = useState(false)
+  const [carregando, setCarregando] = useState(true)
   const [erro,       setErro]       = useState('')
 
   useEffect(() => {
     if (!usuario) return
-    setCarregando(true)
-    setErro('')
+    let ativo = true
+
     Promise.all([api.dashboard(), api.transacoes()])
-      .then(([dash, trans]) => { setDashboard(dash); setTransacoes(trans) })
-      .catch((e) => setErro(e.message))
-      .finally(() => setCarregando(false))
+      .then(([dash, trans]) => {
+        if (!ativo) return
+        setDashboard(dash)
+        setTransacoes(trans)
+        setErro('')
+      })
+      .catch((e) => { if (ativo) setErro(e.message) })
+      .finally(() => { if (ativo) setCarregando(false) })
+
+    return () => { ativo = false }
   }, [usuario])
 
   return (
     <div className="home-root">
 
       {/* ── Header ── */}
-      <header className="home-header">
+      <header className="home-header anim-fade">
         <div className="header-brand">
           <img src={logo} alt="SafeCash" className="header-logo" />
           <span className="header-brand-name">SafeCash</span>
         </div>
 
         <nav className="header-nav">
-          <a href="#" className="nav-link active">Dashboard</a>
-          <a href="#" className="nav-link">Transações</a>
-          <a href="#" className="nav-link">Investimentos</a>
-          <a href="#" className="nav-link">Relatórios</a>
+          {['Dashboard', 'Transações', 'Investimentos', 'Relatórios'].map((item, i) => (
+            <a
+              href="#"
+              key={item}
+              className={`nav-link anim-fade${i === 0 ? ' active' : ''}`}
+              style={{ '--i': i + 1 }}
+            >
+              {item}
+            </a>
+          ))}
         </nav>
 
         <div className="header-user">
@@ -111,7 +125,7 @@ export default function HomePage() {
 
         {!carregando && !erro && dashboard && (
           <>
-            <div className="account-card anim-up">
+            <div className="account-card anim-up" style={{ '--i': 1 }}>
               <div className="card-top">
                 <div className="card-brand">
                   <img src={logo} alt="SafeCash" className="card-logo" />
@@ -122,7 +136,7 @@ export default function HomePage() {
 
               <div className="card-balance">
                 <p className="balance-label">Saldo disponível</p>
-                <p className="balance-value">{dashboard.saldoTotal}</p>
+                <ValorAnimado className="balance-value" texto={dashboard.saldoTotal} />
                 <p className="balance-delta up">▲ {dashboard.saldoDelta}</p>
               </div>
 
@@ -133,29 +147,29 @@ export default function HomePage() {
             </div>
 
             {/* ── Stats ── */}
-            <div className="stats-row anim-up">
-              <div className="stat-card">
+            <div className="stats-row anim-up" style={{ '--i': 2 }}>
+              <div className="stat-card anim-scale" style={{ '--i': 3 }}>
                 <span className="stat-label">Receitas</span>
-                <span className="stat-value">{dashboard.receitas}</span>
+                <ValorAnimado className="stat-value" texto={dashboard.receitas} />
                 <span className="stat-delta up">▲ {dashboard.receitasDelta}</span>
-                <div className="stat-bar"><div className="stat-bar-fill green" style={{ width: '72%' }} /></div>
+                <div className="stat-bar"><div className="stat-bar-fill green" style={{ '--largura': '72%' }} /></div>
               </div>
-              <div className="stat-card">
+              <div className="stat-card anim-scale" style={{ '--i': 4 }}>
                 <span className="stat-label">Despesas</span>
-                <span className="stat-value">{dashboard.despesas}</span>
+                <ValorAnimado className="stat-value" texto={dashboard.despesas} />
                 <span className="stat-delta down">▼ {dashboard.despesasDelta}</span>
-                <div className="stat-bar"><div className="stat-bar-fill red" style={{ width: '28%' }} /></div>
+                <div className="stat-bar"><div className="stat-bar-fill red" style={{ '--largura': '28%' }} /></div>
               </div>
-              <div className="stat-card">
+              <div className="stat-card anim-scale" style={{ '--i': 5 }}>
                 <span className="stat-label">Investimentos</span>
-                <span className="stat-value">{dashboard.investimentos}</span>
+                <ValorAnimado className="stat-value" texto={dashboard.investimentos} />
                 <span className="stat-delta up">▲ {dashboard.investimentosDelta}</span>
-                <div className="stat-bar"><div className="stat-bar-fill" style={{ width: '64%' }} /></div>
+                <div className="stat-bar"><div className="stat-bar-fill" style={{ '--largura': '64%' }} /></div>
               </div>
             </div>
 
             {/* ── Grid de conteúdo ── */}
-            <div className="content-grid anim-up">
+            <div className="content-grid anim-up" style={{ '--i': 3 }}>
 
               {/* Transações */}
               <div className="card">
@@ -167,7 +181,7 @@ export default function HomePage() {
                       <p>Nenhuma transação encontrada</p>
                     </div>
                   ) : transacoes.map((t, i) => (
-                    <div className="trans-item" key={i}>
+                    <div className="trans-item anim-side" key={i} style={{ '--i': i + 4 }}>
                       <div className={`trans-icon ${t.tipo}`}>
                         {ICONES[t.tipo] ?? '?'}
                       </div>
@@ -201,7 +215,7 @@ export default function HomePage() {
                       { icon: 'P',  label: 'PIX'       },
                       { icon: '≡', label: 'Extrato'   },
                     ].map((a, i) => (
-                      <button className="action-btn" key={i}>
+                      <button className="action-btn anim-scale" key={i} style={{ '--i': i + 5 }}>
                         <div className="action-icon">{a.icon}</div>
                         <span className="action-label">{a.label}</span>
                       </button>
@@ -213,15 +227,15 @@ export default function HomePage() {
                 <div className="card">
                   <p className="card-title">Status de Segurança</p>
                   <ul className="seg-list">
-                    <li className="seg-item ok">
+                    <li className="seg-item ok anim-side" style={{ '--i': 6 }}>
                       <div className="seg-dot" />
                       Autenticação ativa
                     </li>
-                    <li className="seg-item ok">
+                    <li className="seg-item ok anim-side" style={{ '--i': 7 }}>
                       <div className="seg-dot" />
                       Criptografia AES-256
                     </li>
-                    <li className="seg-item ok">
+                    <li className="seg-item ok anim-side" style={{ '--i': 8 }}>
                       <div className="seg-dot" />
                       Sessão verificada
                     </li>
@@ -235,7 +249,7 @@ export default function HomePage() {
 
       </main>
 
-      <footer className="home-footer">
+      <footer className="home-footer anim-fade">
         <span className="footer-brand">SafeCash</span>
         <span>© 2026 — Todos os direitos reservados. CNPJ 00.000.000/0001-00</span>
       </footer>

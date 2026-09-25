@@ -4,36 +4,9 @@ import './LoginPage.css'
 import logo from '../assets/2.png'
 import { api } from '../services/api'
 import { useAuth } from '../contexts/auth-context'
+import { IconeEmail, IconeSenha, IconeOlho } from '../components/ui/icones'
 
 const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-function IconeEmail() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <rect x="2.5" y="4.5" width="19" height="15" rx="2.5" />
-      <path d="m3 7 8.1 5.4a2 2 0 0 0 2.2 0L21.5 7" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function IconeSenha() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <rect x="4" y="10.5" width="16" height="10.5" rx="2.5" />
-      <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function IconeOlho({ aberto }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <path d="M2.2 12S6 5.5 12 5.5 21.8 12 21.8 12 18 18.5 12 18.5 2.2 12 2.2 12Z" strokeLinejoin="round" />
-      <circle cx="12" cy="12" r="3.2" />
-      {!aberto && <path d="m4 20 16-16" strokeLinecap="round" />}
-    </svg>
-  )
-}
 
 export default function LoginPage() {
   const { login, motivoSaida, limparMotivoSaida } = useAuth()

@@ -4,6 +4,7 @@ import './RegisterPage.css'
 import logo from '../assets/2.png'
 import { api } from '../services/api'
 import { useAuth } from '../contexts/auth-context'
+import { IconeUsuario, IconeEmail, IconeSenha, IconeOlho } from '../components/ui/icones'
 
 export default function RegisterPage() {
   const { login } = useAuth()
@@ -119,35 +120,42 @@ export default function RegisterPage() {
               <form onSubmit={handleSubmit} className="register-form" noValidate>
                 <div className="field">
                   <label htmlFor="nome">Nome completo</label>
-                  <input
-                    id="nome"
-                    name="nome"
-                    type="text"
-                    value={nome}
-                    onChange={(e) => { setNome(e.target.value); limparErro() }}
-                    placeholder="Como prefere ser chamado?"
-                    autoComplete="name"
-                    autoFocus
-                  />
+                  <div className="field-control">
+                    <span className="field-icon"><IconeUsuario /></span>
+                    <input
+                      id="nome"
+                      name="nome"
+                      type="text"
+                      value={nome}
+                      onChange={(e) => { setNome(e.target.value); limparErro() }}
+                      placeholder="Como prefere ser chamado?"
+                      autoComplete="name"
+                      autoFocus
+                    />
+                  </div>
                 </div>
 
                 <div className="field">
                   <label htmlFor="email">E-mail</label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); limparErro() }}
-                    placeholder="seu@email.com"
-                    autoComplete="email"
-                  />
+                  <div className="field-control">
+                    <span className="field-icon"><IconeEmail /></span>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); limparErro() }}
+                      placeholder="seu@email.com"
+                      autoComplete="email"
+                    />
+                  </div>
                 </div>
 
                 <div className="field-row">
                   <div className="field">
                     <label htmlFor="senha">Senha</label>
-                    <div className="field-senha">
+                    <div className="field-control">
+                      <span className="field-icon"><IconeSenha /></span>
                       <input
                         id="senha"
                         name="senha"
@@ -161,16 +169,19 @@ export default function RegisterPage() {
                         type="button"
                         className="toggle-senha"
                         aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
-                        onClick={() => setMostrarSenha(!mostrarSenha)}
+                        aria-pressed={mostrarSenha}
+                        onClick={() => setMostrarSenha((v) => !v)}
+                        tabIndex={-1}
                       >
-                        {mostrarSenha ? '○' : '●'}
+                        <IconeOlho aberto={mostrarSenha} />
                       </button>
                     </div>
                   </div>
 
                   <div className="field">
                     <label htmlFor="confirmar">Confirmar senha</label>
-                    <div className="field-senha">
+                    <div className="field-control">
+                      <span className="field-icon"><IconeSenha /></span>
                       <input
                         id="confirmar"
                         name="confirmar"
@@ -197,7 +208,7 @@ export default function RegisterPage() {
                 )}
 
                 <button type="submit" className="btn-primary" disabled={carregando}>
-                  {carregando ? <span className="spinner" /> : 'Criar minha conta'}
+                  {carregando ? (<><span className="spinner" /> Criando…</>) : 'Criar minha conta'}
                 </button>
               </form>
 

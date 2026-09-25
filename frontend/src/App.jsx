@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/auth-context'
 import './styles/shared.css'
@@ -9,21 +9,30 @@ import HomePage     from './pages/HomePage'
 function LoadingScreen() {
   return (
     <div className="loading-screen">
-      <span className="spinner-dark" />
+      <div className="loading-marca">
+        <span className="spinner-dark" />
+        <span className="loading-texto">SafeCash</span>
+      </div>
     </div>
   )
+}
+
+// Reanima o conteúdo a cada troca de rota
+function TransicaoRota({ children }) {
+  const { pathname } = useLocation()
+  return <div className="route-fade" key={pathname}>{children}</div>
 }
 
 function PrivateRoute({ children }) {
   const { usuario, carregando } = useAuth()
   if (carregando) return <LoadingScreen />
-  return usuario ? children : <Navigate to="/login" replace />
+  return usuario ? <TransicaoRota>{children}</TransicaoRota> : <Navigate to="/login" replace />
 }
 
 function PublicRoute({ children }) {
   const { usuario, carregando } = useAuth()
   if (carregando) return <LoadingScreen />
-  return usuario ? <Navigate to="/" replace /> : children
+  return usuario ? <Navigate to="/" replace /> : <TransicaoRota>{children}</TransicaoRota>
 }
 
 export default function App() {
