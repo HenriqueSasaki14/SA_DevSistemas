@@ -1,0 +1,230 @@
+@import '../styles/shared.css';
+
+/* ══════════════════════════════════════
+   REGISTER PAGE — SafeCash Premium Design
+   ══════════════════════════════════════ */
+
+.register-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 45fr 55fr;
+  background: var(--surface);
+}
+
+/* ── Left Panel ── */
+.register-panel {
+  background: var(--navy-mid);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.5rem 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-panel::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.03);
+  pointer-events: none;
+}
+
+.register-panel .panel-brand   { position: relative; z-index: 1; }
+.register-panel .panel-body    { position: relative; z-index: 1; }
+.register-panel .panel-footer  { position: relative; z-index: 1; }
+
+/* Steps */
+.reg-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.reg-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+
+.reg-step + .reg-step {
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+
+.step-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.step-circle.active {
+  background: var(--gold-light);
+  color: var(--navy);
+}
+
+.step-circle.dim {
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.3);
+}
+
+.step-info strong {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.9);
+  margin-bottom: 2px;
+}
+
+.step-info.dim strong { color: rgba(255,255,255,.3); }
+
+.step-info span {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,.4);
+  line-height: 1.4;
+}
+
+.step-info.dim span { color: rgba(255,255,255,.2); }
+
+/* ── Right Panel ── */
+.register-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2.5rem;
+  background: var(--surface);
+  overflow-y: auto;
+}
+
+.register-box {
+  width: 100%;
+  max-width: 460px;
+}
+
+.register-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.register-mobile-brand img {
+  width: 26px; height: 26px;
+  object-fit: contain;
+}
+
+.register-mobile-brand span {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.register-heading {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+}
+
+.register-sub {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+/* Validação em tempo real */
+.pass-hints {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-top: 0.1rem;
+}
+
+.hint {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color .2s;
+}
+
+.hint::before {
+  content: '○';
+  font-size: 0.65rem;
+}
+
+.hint.ok { color: var(--green); }
+.hint.ok::before { content: '●'; }
+
+/* Tela de sucesso */
+.sucesso-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  animation: fadeUp .4s ease;
+}
+
+.sucesso-check {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  border: 2px solid rgba(5,150,105,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--green);
+  margin-bottom: 0.5rem;
+}
+
+.sucesso-titulo {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sucesso-sub {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsivo */
+@media (max-width: 800px) {
+  .register-page { grid-template-columns: 1fr; }
+  .register-panel { display: none; }
+  .register-mobile-brand { display: flex; }
+  .register-form-panel { padding: 2rem 1.5rem; align-items: flex-start; padding-top: 3rem; }
+  .field-row { grid-template-columns: 1fr; }
+}
