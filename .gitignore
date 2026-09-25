@@ -1,4 +1,5 @@
-.env
 node_modules/
-package-lock.json
+.env
 banco.db
+dist/
+.claude/settings.local.json

@@ -1,7 +1,13 @@
 {
-  "dependencies": {
-    "pg": "^8.21.0",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.8"
+  "name": "safecash",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npm run dev --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
