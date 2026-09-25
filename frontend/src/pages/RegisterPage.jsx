@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './RegisterPage.css'
 import logo from '../assets/2.png'
 import { api } from '../services/api'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/auth-context'
 
 export default function RegisterPage() {
   const { login } = useAuth()

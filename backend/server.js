@@ -7,17 +7,60 @@ const db = require('./db')
 
 const JWT_SECRET = process.env.JWT_SECRET
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+const JWT_ISSUER = 'safecash'
+const JWT_ALGORITMO = 'HS256'
+
 if (!JWT_SECRET) {
   console.error('JWT_SECRET não definido. Copie backend/.env.example para backend/.env')
   process.exit(1)
 }
+if (JWT_SECRET.length < 32) {
+  console.warn('Atenção: JWT_SECRET curto. Use pelo menos 32 caracteres aleatórios.')
+}
 
 function gerarToken(usuario) {
-  return jwt.sign({ id: usuario.id, email: usuario.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+  return jwt.sign({ email: usuario.email }, JWT_SECRET, {
+    algorithm: JWT_ALGORITMO,
+    issuer: JWT_ISSUER,
+    subject: String(usuario.id),
+    expiresIn: JWT_EXPIRES_IN,
+  })
+}
+
+// Limite de tentativas de login por e-mail + IP, contra força bruta
+const MAX_TENTATIVAS = 5
+const JANELA_MS = 15 * 60 * 1000
+const tentativas = new Map()
+
+function chaveTentativa(req, email) {
+  return `${req.ip}|${String(email).toLowerCase()}`
+}
+
+function bloqueadoAte(chave) {
+  const registro = tentativas.get(chave)
+  if (!registro || Date.now() - registro.desde > JANELA_MS) {
+    tentativas.delete(chave)
+    return 0
+  }
+  return registro.total >= MAX_TENTATIVAS ? registro.desde + JANELA_MS : 0
+}
+
+function registrarFalha(chave) {
+  const registro = tentativas.get(chave)
+  if (!registro || Date.now() - registro.desde > JANELA_MS) {
+    tentativas.set(chave, { total: 1, desde: Date.now() })
+  } else {
+    registro.total += 1
+  }
 }
 
 const app = express()
-app.use(cors({ origin: 'http://localhost:5173' }))
+// Origens liberadas (o Vite troca de porta quando a 5173 está ocupada)
+const ORIGENS = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174')
+  .split(',')
+  .map((o) => o.trim())
+
+app.use(cors({ origin: ORIGENS }))
 app.use(express.json())
 
 // ── Middleware: verifica o token JWT ──────────────────────────────
@@ -27,13 +70,14 @@ function autenticar(req, res, next) {
 
   let dados
   try {
-    dados = jwt.verify(token, JWT_SECRET)
+    // algorithms fixo impede token forjado com outro algoritmo (ex.: "none")
+    dados = jwt.verify(token, JWT_SECRET, { algorithms: [JWT_ALGORITMO], issuer: JWT_ISSUER })
   } catch (err) {
     const erro = err.name === 'TokenExpiredError' ? 'Sessão expirada, faça login novamente' : 'Token inválido'
     return res.status(401).json({ erro })
   }
 
-  const usuario = db.prepare('SELECT id, nome, email FROM usuarios WHERE id = ?').get(dados.id)
+  const usuario = db.prepare('SELECT id, nome, email FROM usuarios WHERE id = ?').get(dados.sub)
   if (!usuario) return res.status(401).json({ erro: 'Usuário não encontrado' })
 
   req.usuario = usuario
@@ -68,14 +112,21 @@ app.post('/api/auth/login', async (req, res) => {
   if (!email || !senha)
     return res.status(400).json({ erro: 'Preencha todos os campos' })
 
+  const chave = chaveTentativa(req, email)
+  const bloqueio = bloqueadoAte(chave)
+  if (bloqueio) {
+    const minutos = Math.ceil((bloqueio - Date.now()) / 60000)
+    return res.status(429).json({ erro: `Muitas tentativas. Tente novamente em ${minutos} min.` })
+  }
+
   const usuario = db.prepare('SELECT * FROM usuarios WHERE email = ?').get(email)
-  if (!usuario)
+  const senhaCorreta = usuario && await bcrypt.compare(senha, usuario.senha)
+  if (!senhaCorreta) {
+    registrarFalha(chave)
     return res.status(401).json({ erro: 'E-mail ou senha incorretos' })
+  }
 
-  const senhaCorreta = await bcrypt.compare(senha, usuario.senha)
-  if (!senhaCorreta)
-    return res.status(401).json({ erro: 'E-mail ou senha incorretos' })
-
+  tentativas.delete(chave)
   const token = gerarToken(usuario)
 
   res.json({ token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email } })

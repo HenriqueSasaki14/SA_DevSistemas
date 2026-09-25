@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './HomePage.css'
 import logo from '../assets/1.png'
 import { api } from '../services/api'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/auth-context'
 import Skeleton from '../components/ui/Skeleton'
 
 function saudacao() {

@@ -12,6 +12,9 @@
 /* ══ PAINEL ESQUERDO (dark) ══ */
 .login-panel {
   background-color: var(--navy);
+  background-image:
+    radial-gradient(900px 500px at 12% -10%, rgba(212,168,67,.16), transparent 60%),
+    radial-gradient(700px 600px at 100% 100%, rgba(51,65,85,.55), transparent 65%);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -41,6 +44,10 @@
   pointer-events: none;
 }
 
+.login-panel > * { animation: entrar .5s ease-out both; }
+.login-panel .panel-body { animation-delay: .06s; }
+.login-panel .panel-footer { animation-delay: .12s; }
+
 .panel-brand {
   display: flex;
   align-items: center;
@@ -54,6 +61,16 @@
   height: 32px;
   object-fit: contain;
   border-radius: 6px;
+}
+
+.panel-brand-name::after {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: var(--gold-light);
 }
 
 .panel-brand-name {
@@ -75,7 +92,7 @@
 }
 
 .panel-headline {
-  font-size: 2.4rem;
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
   font-weight: 700;
   color: #ffffff;
   line-height: 1.18;
@@ -86,6 +103,12 @@
   font-style: normal;
   color: var(--gold-light);
 }
+
+.panel-feature {
+  transition: transform .18s;
+}
+
+.panel-feature:hover { transform: translateX(3px); }
 
 .panel-sub {
   margin-top: 1rem;
@@ -141,6 +164,7 @@
 /* ══ PAINEL DIREITO (formulário) ══ */
 .login-form-panel {
   background-color: var(--surface);
+  background-image: radial-gradient(600px 400px at 80% 0%, var(--bg), transparent 70%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,6 +175,12 @@
 .login-box {
   width: 100%;
   max-width: 420px;
+  animation: entrar .45s ease-out both;
+}
+
+@keyframes entrar {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
 }
 
 .login-mobile-brand {
@@ -172,7 +202,7 @@
 }
 
 .login-heading {
-  font-size: 1.8rem;
+  font-size: clamp(1.55rem, 2.4vw, 1.85rem);
   font-weight: 700;
   color: var(--navy);
   letter-spacing: -0.5px;
@@ -210,7 +240,19 @@
 
 .text-link:hover { text-decoration: underline; }
 
+/* ══ ACESSIBILIDADE ══ */
+@media (prefers-reduced-motion: reduce) {
+  .login-box,
+  .login-panel > * { animation: none; }
+  .panel-feature:hover { transform: none; }
+}
+
 /* ══ RESPONSIVO ══ */
+@media (max-width: 1100px) {
+  .login-page { grid-template-columns: 42% 58%; }
+  .login-panel { padding: 2.25rem 2.25rem; }
+}
+
 @media (max-width: 800px) {
   .login-page { display: block; }
   .login-panel { display: none; }
