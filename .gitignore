@@ -1,5 +1,7 @@
 node_modules/
 .env
+*.env*
 banco.db
 dist/
+generated/
 .claude/settings.local.json
