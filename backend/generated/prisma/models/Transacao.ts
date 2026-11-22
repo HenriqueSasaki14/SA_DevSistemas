@@ -28,104 +28,116 @@ export type AggregateTransacao = {
 
 export type TransacaoAvgAggregateOutputType = {
   id: number | null
-  usuario_id: number | null
-  categoria_id: number | null
-  valor: runtime.Decimal | null
+  usuarioId: number | null
+  valorCentavos: number | null
+  deletadoPorId: number | null
 }
 
 export type TransacaoSumAggregateOutputType = {
   id: number | null
-  usuario_id: number | null
-  categoria_id: number | null
-  valor: runtime.Decimal | null
+  usuarioId: number | null
+  valorCentavos: number | null
+  deletadoPorId: number | null
 }
 
 export type TransacaoMinAggregateOutputType = {
   id: number | null
-  usuario_id: number | null
-  categoria_id: number | null
+  usuarioId: number | null
+  tipo: $Enums.TipoTransacao | null
   descricao: string | null
-  valor: runtime.Decimal | null
-  tipo: string | null
-  data_transacao: Date | null
-  atualizao_ultima: Date | null
-  deleted_quando: Date | null
+  valorCentavos: number | null
+  dataTransacao: Date | null
+  chaveUnica: string | null
+  criadoEm: Date | null
+  atualizadoEm: Date | null
+  deletadoEm: Date | null
+  deletadoPorId: number | null
 }
 
 export type TransacaoMaxAggregateOutputType = {
   id: number | null
-  usuario_id: number | null
-  categoria_id: number | null
+  usuarioId: number | null
+  tipo: $Enums.TipoTransacao | null
   descricao: string | null
-  valor: runtime.Decimal | null
-  tipo: string | null
-  data_transacao: Date | null
-  atualizao_ultima: Date | null
-  deleted_quando: Date | null
+  valorCentavos: number | null
+  dataTransacao: Date | null
+  chaveUnica: string | null
+  criadoEm: Date | null
+  atualizadoEm: Date | null
+  deletadoEm: Date | null
+  deletadoPorId: number | null
 }
 
 export type TransacaoCountAggregateOutputType = {
   id: number
-  usuario_id: number
-  categoria_id: number
-  descricao: number
-  valor: number
+  usuarioId: number
   tipo: number
-  data_transacao: number
-  atualizao_ultima: number
-  deleted_quando: number
+  descricao: number
+  valorCentavos: number
+  dataTransacao: number
+  chaveUnica: number
+  criadoEm: number
+  atualizadoEm: number
+  deletadoEm: number
+  deletadoPorId: number
   _all: number
 }
 
 
 export type TransacaoAvgAggregateInputType = {
   id?: true
-  usuario_id?: true
-  categoria_id?: true
-  valor?: true
+  usuarioId?: true
+  valorCentavos?: true
+  deletadoPorId?: true
 }
 
 export type TransacaoSumAggregateInputType = {
   id?: true
-  usuario_id?: true
-  categoria_id?: true
-  valor?: true
+  usuarioId?: true
+  valorCentavos?: true
+  deletadoPorId?: true
 }
 
 export type TransacaoMinAggregateInputType = {
   id?: true
-  usuario_id?: true
-  categoria_id?: true
-  descricao?: true
-  valor?: true
+  usuarioId?: true
   tipo?: true
-  data_transacao?: true
-  atualizao_ultima?: true
-  deleted_quando?: true
+  descricao?: true
+  valorCentavos?: true
+  dataTransacao?: true
+  chaveUnica?: true
+  criadoEm?: true
+  atualizadoEm?: true
+  deletadoEm?: true
+  deletadoPorId?: true
 }
 
 export type TransacaoMaxAggregateInputType = {
   id?: true
-  usuario_id?: true
-  categoria_id?: true
-  descricao?: true
-  valor?: true
+  usuarioId?: true
   tipo?: true
-  data_transacao?: true
-  atualizao_ultima?: true
-  deleted_quando?: true
+  descricao?: true
+  valorCentavos?: true
+  dataTransacao?: true
+  chaveUnica?: true
+  criadoEm?: true
+  atualizadoEm?: true
+  deletadoEm?: true
+  deletadoPorId?: true
 }
 
 export type TransacaoCountAggregateInputType = {
   id?: true
-  usuario_id?: true
-  categoria_id?: true
-  descricao?: true
-  valor?: true
+  usuarioId?: true
   tipo?: true
-  data_transacao?: true
-  atualizao_ultima?: true
-  deleted_quando?: true
+  descricao?: true
+  valorCentavos?: true
+  dataTransacao?: true
+  chaveUnica?: true
+  criadoEm?: true
+  atualizadoEm?: true
+  deletadoEm?: true
+  deletadoPorId?: true
   _all?: true
 }
 
@@ -217,14 +229,16 @@ export type TransacaoGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 
 export type TransacaoGroupByOutputType = {
   id: number
-  usuario_id: number
-  categoria_id: number
-  descricao: string | null
-  valor: runtime.Decimal
-  tipo: string
-  data_transacao: Date
-  atualizao_ultima: Date
-  deleted_quando: Date | null
+  usuarioId: number
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date
+  chaveUnica: string
+  criadoEm: Date
+  atualizadoEm: Date
+  deletadoEm: Date | null
+  deletadoPorId: number | null
   _count: TransacaoCountAggregateOutputType | null
   _avg: TransacaoAvgAggregateOutputType | null
   _sum: TransacaoSumAggregateOutputType | null
@@ -252,59 +266,71 @@ export type TransacaoWhereInput = {
   OR?: Prisma.TransacaoWhereInput[]
   NOT?: Prisma.TransacaoWhereInput | Prisma.TransacaoWhereInput[]
   id?: Prisma.IntFilter<"Transacao"> | number
-  usuario_id?: Prisma.IntFilter<"Transacao"> | number
-  categoria_id?: Prisma.IntFilter<"Transacao"> | number
-  descricao?: Prisma.StringNullableFilter<"Transacao"> | string | null
-  valor?: Prisma.DecimalFilter<"Transacao"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFilter<"Transacao"> | string
-  data_transacao?: Prisma.DateTimeFilter<"Transacao"> | Date | string
-  atualizao_ultima?: Prisma.DateTimeFilter<"Transacao"> | Date | string
-  deleted_quando?: Prisma.DateTimeNullableFilter<"Transacao"> | Date | string | null
-  categoria?: Prisma.XOR<Prisma.CategoriaScalarRelationFilter, Prisma.CategoriaWhereInput>
+  usuarioId?: Prisma.IntFilter<"Transacao"> | number
+  tipo?: Prisma.EnumTipoTransacaoFilter<"Transacao"> | $Enums.TipoTransacao
+  descricao?: Prisma.StringFilter<"Transacao"> | string
+  valorCentavos?: Prisma.IntFilter<"Transacao"> | number
+  dataTransacao?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  chaveUnica?: Prisma.StringFilter<"Transacao"> | string
+  criadoEm?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  atualizadoEm?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  deletadoEm?: Prisma.DateTimeNullableFilter<"Transacao"> | Date | string | null
+  deletadoPorId?: Prisma.IntNullableFilter<"Transacao"> | number | null
   usuario?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
+  deletadoPor?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
+  auditorias?: Prisma.AuditoriaListRelationFilter
 }
 
 export type TransacaoOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  usuario_id?: Prisma.SortOrder
-  categoria_id?: Prisma.SortOrder
-  descricao?: Prisma.SortOrderInput | Prisma.SortOrder
-  valor?: Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
   tipo?: Prisma.SortOrder
-  data_transacao?: Prisma.SortOrder
-  atualizao_ultima?: Prisma.SortOrder
-  deleted_quando?: Prisma.SortOrderInput | Prisma.SortOrder
-  categoria?: Prisma.CategoriaOrderByWithRelationInput
+  descricao?: Prisma.SortOrder
+  valorCentavos?: Prisma.SortOrder
+  dataTransacao?: Prisma.SortOrder
+  chaveUnica?: Prisma.SortOrder
+  criadoEm?: Prisma.SortOrder
+  atualizadoEm?: Prisma.SortOrder
+  deletadoEm?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
   usuario?: Prisma.UsuarioOrderByWithRelationInput
+  deletadoPor?: Prisma.UsuarioOrderByWithRelationInput
+  auditorias?: Prisma.AuditoriaOrderByRelationAggregateInput
 }
 
 export type TransacaoWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  usuario_chave_unica?: Prisma.TransacaoUsuario_chave_unicaCompoundUniqueInput
   AND?: Prisma.TransacaoWhereInput | Prisma.TransacaoWhereInput[]
   OR?: Prisma.TransacaoWhereInput[]
   NOT?: Prisma.TransacaoWhereInput | Prisma.TransacaoWhereInput[]
-  usuario_id?: Prisma.IntFilter<"Transacao"> | number
-  categoria_id?: Prisma.IntFilter<"Transacao"> | number
-  descricao?: Prisma.StringNullableFilter<"Transacao"> | string | null
-  valor?: Prisma.DecimalFilter<"Transacao"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFilter<"Transacao"> | string
-  data_transacao?: Prisma.DateTimeFilter<"Transacao"> | Date | string
-  atualizao_ultima?: Prisma.DateTimeFilter<"Transacao"> | Date | string
-  deleted_quando?: Prisma.DateTimeNullableFilter<"Transacao"> | Date | string | null
-  categoria?: Prisma.XOR<Prisma.CategoriaScalarRelationFilter, Prisma.CategoriaWhereInput>
+  usuarioId?: Prisma.IntFilter<"Transacao"> | number
+  tipo?: Prisma.EnumTipoTransacaoFilter<"Transacao"> | $Enums.TipoTransacao
+  descricao?: Prisma.StringFilter<"Transacao"> | string
+  valorCentavos?: Prisma.IntFilter<"Transacao"> | number
+  dataTransacao?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  chaveUnica?: Prisma.StringFilter<"Transacao"> | string
+  criadoEm?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  atualizadoEm?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  deletadoEm?: Prisma.DateTimeNullableFilter<"Transacao"> | Date | string | null
+  deletadoPorId?: Prisma.IntNullableFilter<"Transacao"> | number | null
   usuario?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
-}, "id">
+  deletadoPor?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
+  auditorias?: Prisma.AuditoriaListRelationFilter
+}, "id" | "usuario_chave_unica">
 
 export type TransacaoOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  usuario_id?: Prisma.SortOrder
-  categoria_id?: Prisma.SortOrder
-  descricao?: Prisma.SortOrderInput | Prisma.SortOrder
-  valor?: Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
   tipo?: Prisma.SortOrder
-  data_transacao?: Prisma.SortOrder
-  atualizao_ultima?: Prisma.SortOrder
-  deleted_quando?: Prisma.SortOrderInput | Prisma.SortOrder
+  descricao?: Prisma.SortOrder
+  valorCentavos?: Prisma.SortOrder
+  dataTransacao?: Prisma.SortOrder
+  chaveUnica?: Prisma.SortOrder
+  criadoEm?: Prisma.SortOrder
+  atualizadoEm?: Prisma.SortOrder
+  deletadoEm?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TransacaoCountOrderByAggregateInput
   _avg?: Prisma.TransacaoAvgOrderByAggregateInput
   _max?: Prisma.TransacaoMaxOrderByAggregateInput
@@ -317,93 +343,113 @@ export type TransacaoScalarWhereWithAggregatesInput = {
   OR?: Prisma.TransacaoScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TransacaoScalarWhereWithAggregatesInput | Prisma.TransacaoScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Transacao"> | number
-  usuario_id?: Prisma.IntWithAggregatesFilter<"Transacao"> | number
-  categoria_id?: Prisma.IntWithAggregatesFilter<"Transacao"> | number
-  descricao?: Prisma.StringNullableWithAggregatesFilter<"Transacao"> | string | null
-  valor?: Prisma.DecimalWithAggregatesFilter<"Transacao"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringWithAggregatesFilter<"Transacao"> | string
-  data_transacao?: Prisma.DateTimeWithAggregatesFilter<"Transacao"> | Date | string
-  atualizao_ultima?: Prisma.DateTimeWithAggregatesFilter<"Transacao"> | Date | string
-  deleted_quando?: Prisma.DateTimeNullableWithAggregatesFilter<"Transacao"> | Date | string | null
+  usuarioId?: Prisma.IntWithAggregatesFilter<"Transacao"> | number
+  tipo?: Prisma.EnumTipoTransacaoWithAggregatesFilter<"Transacao"> | $Enums.TipoTransacao
+  descricao?: Prisma.StringWithAggregatesFilter<"Transacao"> | string
+  valorCentavos?: Prisma.IntWithAggregatesFilter<"Transacao"> | number
+  dataTransacao?: Prisma.DateTimeWithAggregatesFilter<"Transacao"> | Date | string
+  chaveUnica?: Prisma.StringWithAggregatesFilter<"Transacao"> | string
+  criadoEm?: Prisma.DateTimeWithAggregatesFilter<"Transacao"> | Date | string
+  atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"Transacao"> | Date | string
+  deletadoEm?: Prisma.DateTimeNullableWithAggregatesFilter<"Transacao"> | Date | string | null
+  deletadoPorId?: Prisma.IntNullableWithAggregatesFilter<"Transacao"> | number | null
 }
 
 export type TransacaoCreateInput = {
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
-  categoria: Prisma.CategoriaCreateNestedOneWithoutTransacoesInput
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
   usuario: Prisma.UsuarioCreateNestedOneWithoutTransacoesInput
+  deletadoPor?: Prisma.UsuarioCreateNestedOneWithoutTransacoesExcluidasInput
+  auditorias?: Prisma.AuditoriaCreateNestedManyWithoutTransacaoInput
 }
 
 export type TransacaoUncheckedCreateInput = {
   id?: number
-  usuario_id: number
-  categoria_id: number
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
+  usuarioId: number
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  deletadoPorId?: number | null
+  auditorias?: Prisma.AuditoriaUncheckedCreateNestedManyWithoutTransacaoInput
 }
 
 export type TransacaoUpdateInput = {
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  categoria?: Prisma.CategoriaUpdateOneRequiredWithoutTransacoesNestedInput
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   usuario?: Prisma.UsuarioUpdateOneRequiredWithoutTransacoesNestedInput
+  deletadoPor?: Prisma.UsuarioUpdateOneWithoutTransacoesExcluidasNestedInput
+  auditorias?: Prisma.AuditoriaUpdateManyWithoutTransacaoNestedInput
 }
 
 export type TransacaoUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  usuario_id?: Prisma.IntFieldUpdateOperationsInput | number
-  categoria_id?: Prisma.IntFieldUpdateOperationsInput | number
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usuarioId?: Prisma.IntFieldUpdateOperationsInput | number
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletadoPorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  auditorias?: Prisma.AuditoriaUncheckedUpdateManyWithoutTransacaoNestedInput
 }
 
 export type TransacaoCreateManyInput = {
   id?: number
-  usuario_id: number
-  categoria_id: number
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
+  usuarioId: number
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  deletadoPorId?: number | null
 }
 
 export type TransacaoUpdateManyMutationInput = {
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TransacaoUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  usuario_id?: Prisma.IntFieldUpdateOperationsInput | number
-  categoria_id?: Prisma.IntFieldUpdateOperationsInput | number
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usuarioId?: Prisma.IntFieldUpdateOperationsInput | number
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletadoPorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type TransacaoListRelationFilter = {
@@ -416,112 +462,70 @@ export type TransacaoOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type TransacaoUsuario_chave_unicaCompoundUniqueInput = {
+  usuarioId: number
+  chaveUnica: string
+}
+
 export type TransacaoCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  usuario_id?: Prisma.SortOrder
-  categoria_id?: Prisma.SortOrder
-  descricao?: Prisma.SortOrder
-  valor?: Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
   tipo?: Prisma.SortOrder
-  data_transacao?: Prisma.SortOrder
-  atualizao_ultima?: Prisma.SortOrder
-  deleted_quando?: Prisma.SortOrder
+  descricao?: Prisma.SortOrder
+  valorCentavos?: Prisma.SortOrder
+  dataTransacao?: Prisma.SortOrder
+  chaveUnica?: Prisma.SortOrder
+  criadoEm?: Prisma.SortOrder
+  atualizadoEm?: Prisma.SortOrder
+  deletadoEm?: Prisma.SortOrder
+  deletadoPorId?: Prisma.SortOrder
 }
 
 export type TransacaoAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  usuario_id?: Prisma.SortOrder
-  categoria_id?: Prisma.SortOrder
-  valor?: Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
+  valorCentavos?: Prisma.SortOrder
+  deletadoPorId?: Prisma.SortOrder
 }
 
 export type TransacaoMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  usuario_id?: Prisma.SortOrder
-  categoria_id?: Prisma.SortOrder
-  descricao?: Prisma.SortOrder
-  valor?: Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
   tipo?: Prisma.SortOrder
-  data_transacao?: Prisma.SortOrder
-  atualizao_ultima?: Prisma.SortOrder
-  deleted_quando?: Prisma.SortOrder
+  descricao?: Prisma.SortOrder
+  valorCentavos?: Prisma.SortOrder
+  dataTransacao?: Prisma.SortOrder
+  chaveUnica?: Prisma.SortOrder
+  criadoEm?: Prisma.SortOrder
+  atualizadoEm?: Prisma.SortOrder
+  deletadoEm?: Prisma.SortOrder
+  deletadoPorId?: Prisma.SortOrder
 }
 
 export type TransacaoMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  usuario_id?: Prisma.SortOrder
-  categoria_id?: Prisma.SortOrder
-  descricao?: Prisma.SortOrder
-  valor?: Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
   tipo?: Prisma.SortOrder
-  data_transacao?: Prisma.SortOrder
-  atualizao_ultima?: Prisma.SortOrder
-  deleted_quando?: Prisma.SortOrder
+  descricao?: Prisma.SortOrder
+  valorCentavos?: Prisma.SortOrder
+  dataTransacao?: Prisma.SortOrder
+  chaveUnica?: Prisma.SortOrder
+  criadoEm?: Prisma.SortOrder
+  atualizadoEm?: Prisma.SortOrder
+  deletadoEm?: Prisma.SortOrder
+  deletadoPorId?: Prisma.SortOrder
 }
 
 export type TransacaoSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  usuario_id?: Prisma.SortOrder
-  categoria_id?: Prisma.SortOrder
-  valor?: Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
+  valorCentavos?: Prisma.SortOrder
+  deletadoPorId?: Prisma.SortOrder
 }
 
-export type TransacaoCreateNestedManyWithoutCategoriaInput = {
-  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutCategoriaInput, Prisma.TransacaoUncheckedCreateWithoutCategoriaInput> | Prisma.TransacaoCreateWithoutCategoriaInput[] | Prisma.TransacaoUncheckedCreateWithoutCategoriaInput[]
-  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutCategoriaInput | Prisma.TransacaoCreateOrConnectWithoutCategoriaInput[]
-  createMany?: Prisma.TransacaoCreateManyCategoriaInputEnvelope
-  connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-}
-
-export type TransacaoUncheckedCreateNestedManyWithoutCategoriaInput = {
-  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutCategoriaInput, Prisma.TransacaoUncheckedCreateWithoutCategoriaInput> | Prisma.TransacaoCreateWithoutCategoriaInput[] | Prisma.TransacaoUncheckedCreateWithoutCategoriaInput[]
-  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutCategoriaInput | Prisma.TransacaoCreateOrConnectWithoutCategoriaInput[]
-  createMany?: Prisma.TransacaoCreateManyCategoriaInputEnvelope
-  connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-}
-
-export type TransacaoUpdateManyWithoutCategoriaNestedInput = {
-  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutCategoriaInput, Prisma.TransacaoUncheckedCreateWithoutCategoriaInput> | Prisma.TransacaoCreateWithoutCategoriaInput[] | Prisma.TransacaoUncheckedCreateWithoutCategoriaInput[]
-  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutCategoriaInput | Prisma.TransacaoCreateOrConnectWithoutCategoriaInput[]
-  upsert?: Prisma.TransacaoUpsertWithWhereUniqueWithoutCategoriaInput | Prisma.TransacaoUpsertWithWhereUniqueWithoutCategoriaInput[]
-  createMany?: Prisma.TransacaoCreateManyCategoriaInputEnvelope
-  set?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-  disconnect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-  delete?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-  connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-  update?: Prisma.TransacaoUpdateWithWhereUniqueWithoutCategoriaInput | Prisma.TransacaoUpdateWithWhereUniqueWithoutCategoriaInput[]
-  updateMany?: Prisma.TransacaoUpdateManyWithWhereWithoutCategoriaInput | Prisma.TransacaoUpdateManyWithWhereWithoutCategoriaInput[]
-  deleteMany?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
-}
-
-export type TransacaoUncheckedUpdateManyWithoutCategoriaNestedInput = {
-  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutCategoriaInput, Prisma.TransacaoUncheckedCreateWithoutCategoriaInput> | Prisma.TransacaoCreateWithoutCategoriaInput[] | Prisma.TransacaoUncheckedCreateWithoutCategoriaInput[]
-  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutCategoriaInput | Prisma.TransacaoCreateOrConnectWithoutCategoriaInput[]
-  upsert?: Prisma.TransacaoUpsertWithWhereUniqueWithoutCategoriaInput | Prisma.TransacaoUpsertWithWhereUniqueWithoutCategoriaInput[]
-  createMany?: Prisma.TransacaoCreateManyCategoriaInputEnvelope
-  set?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-  disconnect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-  delete?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-  connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
-  update?: Prisma.TransacaoUpdateWithWhereUniqueWithoutCategoriaInput | Prisma.TransacaoUpdateWithWhereUniqueWithoutCategoriaInput[]
-  updateMany?: Prisma.TransacaoUpdateManyWithWhereWithoutCategoriaInput | Prisma.TransacaoUpdateManyWithWhereWithoutCategoriaInput[]
-  deleteMany?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type DecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
+export type TransacaoScalarRelationFilter = {
+  is?: Prisma.TransacaoWhereInput
+  isNot?: Prisma.TransacaoWhereInput
 }
 
 export type TransacaoCreateNestedManyWithoutUsuarioInput = {
@@ -531,10 +535,24 @@ export type TransacaoCreateNestedManyWithoutUsuarioInput = {
   connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
 }
 
+export type TransacaoCreateNestedManyWithoutDeletadoPorInput = {
+  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutDeletadoPorInput, Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput> | Prisma.TransacaoCreateWithoutDeletadoPorInput[] | Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput[]
+  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutDeletadoPorInput | Prisma.TransacaoCreateOrConnectWithoutDeletadoPorInput[]
+  createMany?: Prisma.TransacaoCreateManyDeletadoPorInputEnvelope
+  connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+}
+
 export type TransacaoUncheckedCreateNestedManyWithoutUsuarioInput = {
   create?: Prisma.XOR<Prisma.TransacaoCreateWithoutUsuarioInput, Prisma.TransacaoUncheckedCreateWithoutUsuarioInput> | Prisma.TransacaoCreateWithoutUsuarioInput[] | Prisma.TransacaoUncheckedCreateWithoutUsuarioInput[]
   connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutUsuarioInput | Prisma.TransacaoCreateOrConnectWithoutUsuarioInput[]
   createMany?: Prisma.TransacaoCreateManyUsuarioInputEnvelope
+  connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+}
+
+export type TransacaoUncheckedCreateNestedManyWithoutDeletadoPorInput = {
+  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutDeletadoPorInput, Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput> | Prisma.TransacaoCreateWithoutDeletadoPorInput[] | Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput[]
+  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutDeletadoPorInput | Prisma.TransacaoCreateOrConnectWithoutDeletadoPorInput[]
+  createMany?: Prisma.TransacaoCreateManyDeletadoPorInputEnvelope
   connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
 }
 
@@ -552,6 +570,20 @@ export type TransacaoUpdateManyWithoutUsuarioNestedInput = {
   deleteMany?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
 }
 
+export type TransacaoUpdateManyWithoutDeletadoPorNestedInput = {
+  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutDeletadoPorInput, Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput> | Prisma.TransacaoCreateWithoutDeletadoPorInput[] | Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput[]
+  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutDeletadoPorInput | Prisma.TransacaoCreateOrConnectWithoutDeletadoPorInput[]
+  upsert?: Prisma.TransacaoUpsertWithWhereUniqueWithoutDeletadoPorInput | Prisma.TransacaoUpsertWithWhereUniqueWithoutDeletadoPorInput[]
+  createMany?: Prisma.TransacaoCreateManyDeletadoPorInputEnvelope
+  set?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+  disconnect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+  delete?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+  connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+  update?: Prisma.TransacaoUpdateWithWhereUniqueWithoutDeletadoPorInput | Prisma.TransacaoUpdateWithWhereUniqueWithoutDeletadoPorInput[]
+  updateMany?: Prisma.TransacaoUpdateManyWithWhereWithoutDeletadoPorInput | Prisma.TransacaoUpdateManyWithWhereWithoutDeletadoPorInput[]
+  deleteMany?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
+}
+
 export type TransacaoUncheckedUpdateManyWithoutUsuarioNestedInput = {
   create?: Prisma.XOR<Prisma.TransacaoCreateWithoutUsuarioInput, Prisma.TransacaoUncheckedCreateWithoutUsuarioInput> | Prisma.TransacaoCreateWithoutUsuarioInput[] | Prisma.TransacaoUncheckedCreateWithoutUsuarioInput[]
   connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutUsuarioInput | Prisma.TransacaoCreateOrConnectWithoutUsuarioInput[]
@@ -566,87 +598,75 @@ export type TransacaoUncheckedUpdateManyWithoutUsuarioNestedInput = {
   deleteMany?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
 }
 
-export type TransacaoCreateWithoutCategoriaInput = {
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
-  usuario: Prisma.UsuarioCreateNestedOneWithoutTransacoesInput
+export type TransacaoUncheckedUpdateManyWithoutDeletadoPorNestedInput = {
+  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutDeletadoPorInput, Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput> | Prisma.TransacaoCreateWithoutDeletadoPorInput[] | Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput[]
+  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutDeletadoPorInput | Prisma.TransacaoCreateOrConnectWithoutDeletadoPorInput[]
+  upsert?: Prisma.TransacaoUpsertWithWhereUniqueWithoutDeletadoPorInput | Prisma.TransacaoUpsertWithWhereUniqueWithoutDeletadoPorInput[]
+  createMany?: Prisma.TransacaoCreateManyDeletadoPorInputEnvelope
+  set?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+  disconnect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+  delete?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+  connect?: Prisma.TransacaoWhereUniqueInput | Prisma.TransacaoWhereUniqueInput[]
+  update?: Prisma.TransacaoUpdateWithWhereUniqueWithoutDeletadoPorInput | Prisma.TransacaoUpdateWithWhereUniqueWithoutDeletadoPorInput[]
+  updateMany?: Prisma.TransacaoUpdateManyWithWhereWithoutDeletadoPorInput | Prisma.TransacaoUpdateManyWithWhereWithoutDeletadoPorInput[]
+  deleteMany?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
 }
 
-export type TransacaoUncheckedCreateWithoutCategoriaInput = {
-  id?: number
-  usuario_id: number
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
+export type EnumTipoTransacaoFieldUpdateOperationsInput = {
+  set?: $Enums.TipoTransacao
 }
 
-export type TransacaoCreateOrConnectWithoutCategoriaInput = {
-  where: Prisma.TransacaoWhereUniqueInput
-  create: Prisma.XOR<Prisma.TransacaoCreateWithoutCategoriaInput, Prisma.TransacaoUncheckedCreateWithoutCategoriaInput>
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
-export type TransacaoCreateManyCategoriaInputEnvelope = {
-  data: Prisma.TransacaoCreateManyCategoriaInput | Prisma.TransacaoCreateManyCategoriaInput[]
-  skipDuplicates?: boolean
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
-export type TransacaoUpsertWithWhereUniqueWithoutCategoriaInput = {
-  where: Prisma.TransacaoWhereUniqueInput
-  update: Prisma.XOR<Prisma.TransacaoUpdateWithoutCategoriaInput, Prisma.TransacaoUncheckedUpdateWithoutCategoriaInput>
-  create: Prisma.XOR<Prisma.TransacaoCreateWithoutCategoriaInput, Prisma.TransacaoUncheckedCreateWithoutCategoriaInput>
+export type TransacaoCreateNestedOneWithoutAuditoriasInput = {
+  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutAuditoriasInput, Prisma.TransacaoUncheckedCreateWithoutAuditoriasInput>
+  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutAuditoriasInput
+  connect?: Prisma.TransacaoWhereUniqueInput
 }
 
-export type TransacaoUpdateWithWhereUniqueWithoutCategoriaInput = {
-  where: Prisma.TransacaoWhereUniqueInput
-  data: Prisma.XOR<Prisma.TransacaoUpdateWithoutCategoriaInput, Prisma.TransacaoUncheckedUpdateWithoutCategoriaInput>
-}
-
-export type TransacaoUpdateManyWithWhereWithoutCategoriaInput = {
-  where: Prisma.TransacaoScalarWhereInput
-  data: Prisma.XOR<Prisma.TransacaoUpdateManyMutationInput, Prisma.TransacaoUncheckedUpdateManyWithoutCategoriaInput>
-}
-
-export type TransacaoScalarWhereInput = {
-  AND?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
-  OR?: Prisma.TransacaoScalarWhereInput[]
-  NOT?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
-  id?: Prisma.IntFilter<"Transacao"> | number
-  usuario_id?: Prisma.IntFilter<"Transacao"> | number
-  categoria_id?: Prisma.IntFilter<"Transacao"> | number
-  descricao?: Prisma.StringNullableFilter<"Transacao"> | string | null
-  valor?: Prisma.DecimalFilter<"Transacao"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFilter<"Transacao"> | string
-  data_transacao?: Prisma.DateTimeFilter<"Transacao"> | Date | string
-  atualizao_ultima?: Prisma.DateTimeFilter<"Transacao"> | Date | string
-  deleted_quando?: Prisma.DateTimeNullableFilter<"Transacao"> | Date | string | null
+export type TransacaoUpdateOneRequiredWithoutAuditoriasNestedInput = {
+  create?: Prisma.XOR<Prisma.TransacaoCreateWithoutAuditoriasInput, Prisma.TransacaoUncheckedCreateWithoutAuditoriasInput>
+  connectOrCreate?: Prisma.TransacaoCreateOrConnectWithoutAuditoriasInput
+  upsert?: Prisma.TransacaoUpsertWithoutAuditoriasInput
+  connect?: Prisma.TransacaoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TransacaoUpdateToOneWithWhereWithoutAuditoriasInput, Prisma.TransacaoUpdateWithoutAuditoriasInput>, Prisma.TransacaoUncheckedUpdateWithoutAuditoriasInput>
 }
 
 export type TransacaoCreateWithoutUsuarioInput = {
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
-  categoria: Prisma.CategoriaCreateNestedOneWithoutTransacoesInput
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  deletadoPor?: Prisma.UsuarioCreateNestedOneWithoutTransacoesExcluidasInput
+  auditorias?: Prisma.AuditoriaCreateNestedManyWithoutTransacaoInput
 }
 
 export type TransacaoUncheckedCreateWithoutUsuarioInput = {
   id?: number
-  categoria_id: number
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  deletadoPorId?: number | null
+  auditorias?: Prisma.AuditoriaUncheckedCreateNestedManyWithoutTransacaoInput
 }
 
 export type TransacaoCreateOrConnectWithoutUsuarioInput = {
@@ -656,6 +676,43 @@ export type TransacaoCreateOrConnectWithoutUsuarioInput = {
 
 export type TransacaoCreateManyUsuarioInputEnvelope = {
   data: Prisma.TransacaoCreateManyUsuarioInput | Prisma.TransacaoCreateManyUsuarioInput[]
+  skipDuplicates?: boolean
+}
+
+export type TransacaoCreateWithoutDeletadoPorInput = {
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  usuario: Prisma.UsuarioCreateNestedOneWithoutTransacoesInput
+  auditorias?: Prisma.AuditoriaCreateNestedManyWithoutTransacaoInput
+}
+
+export type TransacaoUncheckedCreateWithoutDeletadoPorInput = {
+  id?: number
+  usuarioId: number
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  auditorias?: Prisma.AuditoriaUncheckedCreateNestedManyWithoutTransacaoInput
+}
+
+export type TransacaoCreateOrConnectWithoutDeletadoPorInput = {
+  where: Prisma.TransacaoWhereUniqueInput
+  create: Prisma.XOR<Prisma.TransacaoCreateWithoutDeletadoPorInput, Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput>
+}
+
+export type TransacaoCreateManyDeletadoPorInputEnvelope = {
+  data: Prisma.TransacaoCreateManyDeletadoPorInput | Prisma.TransacaoCreateManyDeletadoPorInput[]
   skipDuplicates?: boolean
 }
 
@@ -675,178 +732,345 @@ export type TransacaoUpdateManyWithWhereWithoutUsuarioInput = {
   data: Prisma.XOR<Prisma.TransacaoUpdateManyMutationInput, Prisma.TransacaoUncheckedUpdateManyWithoutUsuarioInput>
 }
 
-export type TransacaoCreateManyCategoriaInput = {
+export type TransacaoScalarWhereInput = {
+  AND?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
+  OR?: Prisma.TransacaoScalarWhereInput[]
+  NOT?: Prisma.TransacaoScalarWhereInput | Prisma.TransacaoScalarWhereInput[]
+  id?: Prisma.IntFilter<"Transacao"> | number
+  usuarioId?: Prisma.IntFilter<"Transacao"> | number
+  tipo?: Prisma.EnumTipoTransacaoFilter<"Transacao"> | $Enums.TipoTransacao
+  descricao?: Prisma.StringFilter<"Transacao"> | string
+  valorCentavos?: Prisma.IntFilter<"Transacao"> | number
+  dataTransacao?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  chaveUnica?: Prisma.StringFilter<"Transacao"> | string
+  criadoEm?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  atualizadoEm?: Prisma.DateTimeFilter<"Transacao"> | Date | string
+  deletadoEm?: Prisma.DateTimeNullableFilter<"Transacao"> | Date | string | null
+  deletadoPorId?: Prisma.IntNullableFilter<"Transacao"> | number | null
+}
+
+export type TransacaoUpsertWithWhereUniqueWithoutDeletadoPorInput = {
+  where: Prisma.TransacaoWhereUniqueInput
+  update: Prisma.XOR<Prisma.TransacaoUpdateWithoutDeletadoPorInput, Prisma.TransacaoUncheckedUpdateWithoutDeletadoPorInput>
+  create: Prisma.XOR<Prisma.TransacaoCreateWithoutDeletadoPorInput, Prisma.TransacaoUncheckedCreateWithoutDeletadoPorInput>
+}
+
+export type TransacaoUpdateWithWhereUniqueWithoutDeletadoPorInput = {
+  where: Prisma.TransacaoWhereUniqueInput
+  data: Prisma.XOR<Prisma.TransacaoUpdateWithoutDeletadoPorInput, Prisma.TransacaoUncheckedUpdateWithoutDeletadoPorInput>
+}
+
+export type TransacaoUpdateManyWithWhereWithoutDeletadoPorInput = {
+  where: Prisma.TransacaoScalarWhereInput
+  data: Prisma.XOR<Prisma.TransacaoUpdateManyMutationInput, Prisma.TransacaoUncheckedUpdateManyWithoutDeletadoPorInput>
+}
+
+export type TransacaoCreateWithoutAuditoriasInput = {
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  usuario: Prisma.UsuarioCreateNestedOneWithoutTransacoesInput
+  deletadoPor?: Prisma.UsuarioCreateNestedOneWithoutTransacoesExcluidasInput
+}
+
+export type TransacaoUncheckedCreateWithoutAuditoriasInput = {
   id?: number
-  usuario_id: number
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
+  usuarioId: number
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  deletadoPorId?: number | null
 }
 
-export type TransacaoUpdateWithoutCategoriaInput = {
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+export type TransacaoCreateOrConnectWithoutAuditoriasInput = {
+  where: Prisma.TransacaoWhereUniqueInput
+  create: Prisma.XOR<Prisma.TransacaoCreateWithoutAuditoriasInput, Prisma.TransacaoUncheckedCreateWithoutAuditoriasInput>
+}
+
+export type TransacaoUpsertWithoutAuditoriasInput = {
+  update: Prisma.XOR<Prisma.TransacaoUpdateWithoutAuditoriasInput, Prisma.TransacaoUncheckedUpdateWithoutAuditoriasInput>
+  create: Prisma.XOR<Prisma.TransacaoCreateWithoutAuditoriasInput, Prisma.TransacaoUncheckedCreateWithoutAuditoriasInput>
+  where?: Prisma.TransacaoWhereInput
+}
+
+export type TransacaoUpdateToOneWithWhereWithoutAuditoriasInput = {
+  where?: Prisma.TransacaoWhereInput
+  data: Prisma.XOR<Prisma.TransacaoUpdateWithoutAuditoriasInput, Prisma.TransacaoUncheckedUpdateWithoutAuditoriasInput>
+}
+
+export type TransacaoUpdateWithoutAuditoriasInput = {
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   usuario?: Prisma.UsuarioUpdateOneRequiredWithoutTransacoesNestedInput
+  deletadoPor?: Prisma.UsuarioUpdateOneWithoutTransacoesExcluidasNestedInput
 }
 
-export type TransacaoUncheckedUpdateWithoutCategoriaInput = {
+export type TransacaoUncheckedUpdateWithoutAuditoriasInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  usuario_id?: Prisma.IntFieldUpdateOperationsInput | number
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-}
-
-export type TransacaoUncheckedUpdateManyWithoutCategoriaInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  usuario_id?: Prisma.IntFieldUpdateOperationsInput | number
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usuarioId?: Prisma.IntFieldUpdateOperationsInput | number
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletadoPorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type TransacaoCreateManyUsuarioInput = {
   id?: number
-  categoria_id: number
-  descricao?: string | null
-  valor: runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo: string
-  data_transacao: Date | string
-  atualizao_ultima?: Date | string
-  deleted_quando?: Date | string | null
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
+  deletadoPorId?: number | null
+}
+
+export type TransacaoCreateManyDeletadoPorInput = {
+  id?: number
+  usuarioId: number
+  tipo: $Enums.TipoTransacao
+  descricao: string
+  valorCentavos: number
+  dataTransacao: Date | string
+  chaveUnica: string
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  deletadoEm?: Date | string | null
 }
 
 export type TransacaoUpdateWithoutUsuarioInput = {
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  categoria?: Prisma.CategoriaUpdateOneRequiredWithoutTransacoesNestedInput
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletadoPor?: Prisma.UsuarioUpdateOneWithoutTransacoesExcluidasNestedInput
+  auditorias?: Prisma.AuditoriaUpdateManyWithoutTransacaoNestedInput
 }
 
 export type TransacaoUncheckedUpdateWithoutUsuarioInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  categoria_id?: Prisma.IntFieldUpdateOperationsInput | number
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletadoPorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  auditorias?: Prisma.AuditoriaUncheckedUpdateManyWithoutTransacaoNestedInput
 }
 
 export type TransacaoUncheckedUpdateManyWithoutUsuarioInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  categoria_id?: Prisma.IntFieldUpdateOperationsInput | number
-  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  valor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  tipo?: Prisma.StringFieldUpdateOperationsInput | string
-  data_transacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  atualizao_ultima?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deleted_quando?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletadoPorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
+export type TransacaoUpdateWithoutDeletadoPorInput = {
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usuario?: Prisma.UsuarioUpdateOneRequiredWithoutTransacoesNestedInput
+  auditorias?: Prisma.AuditoriaUpdateManyWithoutTransacaoNestedInput
+}
+
+export type TransacaoUncheckedUpdateWithoutDeletadoPorInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  usuarioId?: Prisma.IntFieldUpdateOperationsInput | number
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  auditorias?: Prisma.AuditoriaUncheckedUpdateManyWithoutTransacaoNestedInput
+}
+
+export type TransacaoUncheckedUpdateManyWithoutDeletadoPorInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  usuarioId?: Prisma.IntFieldUpdateOperationsInput | number
+  tipo?: Prisma.EnumTipoTransacaoFieldUpdateOperationsInput | $Enums.TipoTransacao
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  dataTransacao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chaveUnica?: Prisma.StringFieldUpdateOperationsInput | string
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+
+/**
+ * Count Type TransacaoCountOutputType
+ */
+
+export type TransacaoCountOutputType = {
+  auditorias: number
+}
+
+export type TransacaoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  auditorias?: boolean | TransacaoCountOutputTypeCountAuditoriasArgs
+}
+
+/**
+ * TransacaoCountOutputType without action
+ */
+export type TransacaoCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TransacaoCountOutputType
+   */
+  select?: Prisma.TransacaoCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TransacaoCountOutputType without action
+ */
+export type TransacaoCountOutputTypeCountAuditoriasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditoriaWhereInput
+}
 
 
 export type TransacaoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  usuario_id?: boolean
-  categoria_id?: boolean
-  descricao?: boolean
-  valor?: boolean
+  usuarioId?: boolean
   tipo?: boolean
-  data_transacao?: boolean
-  atualizao_ultima?: boolean
-  deleted_quando?: boolean
-  categoria?: boolean | Prisma.CategoriaDefaultArgs<ExtArgs>
+  descricao?: boolean
+  valorCentavos?: boolean
+  dataTransacao?: boolean
+  chaveUnica?: boolean
+  criadoEm?: boolean
+  atualizadoEm?: boolean
+  deletadoEm?: boolean
+  deletadoPorId?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
+  deletadoPor?: boolean | Prisma.Transacao$deletadoPorArgs<ExtArgs>
+  auditorias?: boolean | Prisma.Transacao$auditoriasArgs<ExtArgs>
+  _count?: boolean | Prisma.TransacaoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transacao"]>
 
 export type TransacaoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  usuario_id?: boolean
-  categoria_id?: boolean
-  descricao?: boolean
-  valor?: boolean
+  usuarioId?: boolean
   tipo?: boolean
-  data_transacao?: boolean
-  atualizao_ultima?: boolean
-  deleted_quando?: boolean
-  categoria?: boolean | Prisma.CategoriaDefaultArgs<ExtArgs>
+  descricao?: boolean
+  valorCentavos?: boolean
+  dataTransacao?: boolean
+  chaveUnica?: boolean
+  criadoEm?: boolean
+  atualizadoEm?: boolean
+  deletadoEm?: boolean
+  deletadoPorId?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
+  deletadoPor?: boolean | Prisma.Transacao$deletadoPorArgs<ExtArgs>
 }, ExtArgs["result"]["transacao"]>
 
 export type TransacaoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  usuario_id?: boolean
-  categoria_id?: boolean
-  descricao?: boolean
-  valor?: boolean
+  usuarioId?: boolean
   tipo?: boolean
-  data_transacao?: boolean
-  atualizao_ultima?: boolean
-  deleted_quando?: boolean
-  categoria?: boolean | Prisma.CategoriaDefaultArgs<ExtArgs>
+  descricao?: boolean
+  valorCentavos?: boolean
+  dataTransacao?: boolean
+  chaveUnica?: boolean
+  criadoEm?: boolean
+  atualizadoEm?: boolean
+  deletadoEm?: boolean
+  deletadoPorId?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
+  deletadoPor?: boolean | Prisma.Transacao$deletadoPorArgs<ExtArgs>
 }, ExtArgs["result"]["transacao"]>
 
 export type TransacaoSelectScalar = {
   id?: boolean
-  usuario_id?: boolean
-  categoria_id?: boolean
-  descricao?: boolean
-  valor?: boolean
+  usuarioId?: boolean
   tipo?: boolean
-  data_transacao?: boolean
-  atualizao_ultima?: boolean
-  deleted_quando?: boolean
+  descricao?: boolean
+  valorCentavos?: boolean
+  dataTransacao?: boolean
+  chaveUnica?: boolean
+  criadoEm?: boolean
+  atualizadoEm?: boolean
+  deletadoEm?: boolean
+  deletadoPorId?: boolean
 }
 
-export type TransacaoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "usuario_id" | "categoria_id" | "descricao" | "valor" | "tipo" | "data_transacao" | "atualizao_ultima" | "deleted_quando", ExtArgs["result"]["transacao"]>
+export type TransacaoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "usuarioId" | "tipo" | "descricao" | "valorCentavos" | "dataTransacao" | "chaveUnica" | "criadoEm" | "atualizadoEm" | "deletadoEm" | "deletadoPorId", ExtArgs["result"]["transacao"]>
 export type TransacaoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  categoria?: boolean | Prisma.CategoriaDefaultArgs<ExtArgs>
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
+  deletadoPor?: boolean | Prisma.Transacao$deletadoPorArgs<ExtArgs>
+  auditorias?: boolean | Prisma.Transacao$auditoriasArgs<ExtArgs>
+  _count?: boolean | Prisma.TransacaoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TransacaoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  categoria?: boolean | Prisma.CategoriaDefaultArgs<ExtArgs>
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
+  deletadoPor?: boolean | Prisma.Transacao$deletadoPorArgs<ExtArgs>
 }
 export type TransacaoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  categoria?: boolean | Prisma.CategoriaDefaultArgs<ExtArgs>
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
+  deletadoPor?: boolean | Prisma.Transacao$deletadoPorArgs<ExtArgs>
 }
 
 export type $TransacaoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Transacao"
   objects: {
-    categoria: Prisma.$CategoriaPayload<ExtArgs>
     usuario: Prisma.$UsuarioPayload<ExtArgs>
+    deletadoPor: Prisma.$UsuarioPayload<ExtArgs> | null
+    auditorias: Prisma.$AuditoriaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    usuario_id: number
-    categoria_id: number
-    descricao: string | null
-    valor: runtime.Decimal
-    tipo: string
-    data_transacao: Date
-    atualizao_ultima: Date
-    deleted_quando: Date | null
+    usuarioId: number
+    tipo: $Enums.TipoTransacao
+    descricao: string
+    valorCentavos: number
+    dataTransacao: Date
+    chaveUnica: string
+    criadoEm: Date
+    atualizadoEm: Date
+    deletadoEm: Date | null
+    deletadoPorId: number | null
   }, ExtArgs["result"]["transacao"]>
   composites: {}
 }
@@ -1241,8 +1465,9 @@ readonly fields: TransacaoFieldRefs;
  */
 export interface Prisma__TransacaoClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  categoria<T extends Prisma.CategoriaDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CategoriaDefaultArgs<ExtArgs>>): Prisma.Prisma__CategoriaClient<runtime.Types.Result.GetResult<Prisma.$CategoriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   usuario<T extends Prisma.UsuarioDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UsuarioDefaultArgs<ExtArgs>>): Prisma.Prisma__UsuarioClient<runtime.Types.Result.GetResult<Prisma.$UsuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  deletadoPor<T extends Prisma.Transacao$deletadoPorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transacao$deletadoPorArgs<ExtArgs>>): Prisma.Prisma__UsuarioClient<runtime.Types.Result.GetResult<Prisma.$UsuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  auditorias<T extends Prisma.Transacao$auditoriasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transacao$auditoriasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditoriaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1273,14 +1498,16 @@ export interface Prisma__TransacaoClient<T, Null = never, ExtArgs extends runtim
  */
 export interface TransacaoFieldRefs {
   readonly id: Prisma.FieldRef<"Transacao", 'Int'>
-  readonly usuario_id: Prisma.FieldRef<"Transacao", 'Int'>
-  readonly categoria_id: Prisma.FieldRef<"Transacao", 'Int'>
+  readonly usuarioId: Prisma.FieldRef<"Transacao", 'Int'>
+  readonly tipo: Prisma.FieldRef<"Transacao", 'TipoTransacao'>
   readonly descricao: Prisma.FieldRef<"Transacao", 'String'>
-  readonly valor: Prisma.FieldRef<"Transacao", 'Decimal'>
-  readonly tipo: Prisma.FieldRef<"Transacao", 'String'>
-  readonly data_transacao: Prisma.FieldRef<"Transacao", 'DateTime'>
-  readonly atualizao_ultima: Prisma.FieldRef<"Transacao", 'DateTime'>
-  readonly deleted_quando: Prisma.FieldRef<"Transacao", 'DateTime'>
+  readonly valorCentavos: Prisma.FieldRef<"Transacao", 'Int'>
+  readonly dataTransacao: Prisma.FieldRef<"Transacao", 'DateTime'>
+  readonly chaveUnica: Prisma.FieldRef<"Transacao", 'String'>
+  readonly criadoEm: Prisma.FieldRef<"Transacao", 'DateTime'>
+  readonly atualizadoEm: Prisma.FieldRef<"Transacao", 'DateTime'>
+  readonly deletadoEm: Prisma.FieldRef<"Transacao", 'DateTime'>
+  readonly deletadoPorId: Prisma.FieldRef<"Transacao", 'Int'>
 }
     
 
@@ -1679,6 +1906,49 @@ export type TransacaoDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many Transacaos to delete.
    */
   limit?: number
+}
+
+/**
+ * Transacao.deletadoPor
+ */
+export type Transacao$deletadoPorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Usuario
+   */
+  select?: Prisma.UsuarioSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Usuario
+   */
+  omit?: Prisma.UsuarioOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UsuarioInclude<ExtArgs> | null
+  where?: Prisma.UsuarioWhereInput
+}
+
+/**
+ * Transacao.auditorias
+ */
+export type Transacao$auditoriasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Auditoria
+   */
+  select?: Prisma.AuditoriaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Auditoria
+   */
+  omit?: Prisma.AuditoriaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditoriaInclude<ExtArgs> | null
+  where?: Prisma.AuditoriaWhereInput
+  orderBy?: Prisma.AuditoriaOrderByWithRelationInput | Prisma.AuditoriaOrderByWithRelationInput[]
+  cursor?: Prisma.AuditoriaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditoriaScalarFieldEnum | Prisma.AuditoriaScalarFieldEnum[]
 }
 
 /**

@@ -51,9 +51,9 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  Categoria: 'Categoria',
+  Usuario: 'Usuario',
   Transacao: 'Transacao',
-  Usuario: 'Usuario'
+  Auditoria: 'Auditoria'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -72,41 +72,46 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const CategoriaScalarFieldEnum = {
+export const UsuarioScalarFieldEnum = {
   id: 'id',
   nome: 'nome',
-  criado_quando: 'criado_quando'
+  email: 'email',
+  senhaHash: 'senhaHash',
+  cpf: 'cpf',
+  telefone: 'telefone',
+  criadoEm: 'criadoEm'
 } as const
 
-export type CategoriaScalarFieldEnum = (typeof CategoriaScalarFieldEnum)[keyof typeof CategoriaScalarFieldEnum]
+export type UsuarioScalarFieldEnum = (typeof UsuarioScalarFieldEnum)[keyof typeof UsuarioScalarFieldEnum]
 
 
 export const TransacaoScalarFieldEnum = {
   id: 'id',
-  usuario_id: 'usuario_id',
-  categoria_id: 'categoria_id',
-  descricao: 'descricao',
-  valor: 'valor',
+  usuarioId: 'usuarioId',
   tipo: 'tipo',
-  data_transacao: 'data_transacao',
-  atualizao_ultima: 'atualizao_ultima',
-  deleted_quando: 'deleted_quando'
+  descricao: 'descricao',
+  valorCentavos: 'valorCentavos',
+  dataTransacao: 'dataTransacao',
+  chaveUnica: 'chaveUnica',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm',
+  deletadoEm: 'deletadoEm',
+  deletadoPorId: 'deletadoPorId'
 } as const
 
 export type TransacaoScalarFieldEnum = (typeof TransacaoScalarFieldEnum)[keyof typeof TransacaoScalarFieldEnum]
 
 
-export const UsuarioScalarFieldEnum = {
-  id_usuario: 'id_usuario',
-  nome: 'nome',
-  email: 'email',
-  senha: 'senha',
-  cpf: 'cpf',
-  telefone: 'telefone',
-  deleted: 'deleted'
+export const AuditoriaScalarFieldEnum = {
+  id: 'id',
+  transacaoId: 'transacaoId',
+  usuarioId: 'usuarioId',
+  tipoAcao: 'tipoAcao',
+  dataAcao: 'dataAcao',
+  dadosAlterados: 'dadosAlterados'
 } as const
 
-export type UsuarioScalarFieldEnum = (typeof UsuarioScalarFieldEnum)[keyof typeof UsuarioScalarFieldEnum]
+export type AuditoriaScalarFieldEnum = (typeof AuditoriaScalarFieldEnum)[keyof typeof AuditoriaScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -115,6 +120,13 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -131,4 +143,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

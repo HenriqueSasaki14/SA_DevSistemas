@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -12,41 +10,61 @@ datasource db {
   provider = "postgresql"
 }
 
-model Categoria {
-  id            Int         @id @default(autoincrement())
-  nome          String
-  criado_quando DateTime    @default(now())
-  
-  transacoes    Transacao[]
-
+enum TipoTransacao {
+  ENTRADA
+  SAIDA
 }
 
-model Transacao {
-  id               Int       @id @default(autoincrement())
-  usuario_id       Int
-  categoria_id     Int
-  descricao        String?
-  valor            Decimal   @db.Decimal(10, 2)
-  tipo             String
-  data_transacao   DateTime  @db.Date
-  atualizao_ultima DateTime  @default(now()) @updatedAt
-  deleted_quando   DateTime?
-
-  categoria        Categoria @relation(fields: [categoria_id], references: [id])
-  usuario          Usuario   @relation(fields: [usuario_id], references: [id_usuario])
-
+enum TipoAcaoAuditoria {
+  CRIACAO
+  EDICAO
+  EXCLUSAO
 }
 
 model Usuario {
-  id_usuario Int         @id @default(autoincrement())
-  nome       String
-  email      String      @unique
-  senha      String
-  cpf        String
-  telefone   String
-  deleted    DateTime?
-  
-  transacoes Transacao[]
+  id                  Int          @id @default(autoincrement())
+  nome                String
+  email               String       @unique
+  senhaHash           String
+  cpf                 String?
+  telefone            String?
+  criadoEm            DateTime     @default(now())
 
+  transacoes          Transacao[]  @relation("UsuarioTransacoes")
+  transacoesExcluidas Transacao[]  @relation("UsuarioExclusoes")
+  auditorias          Auditoria[]  @relation("UsuarioAuditorias")
+}
 
+model Transacao {
+  id             Int            @id @default(autoincrement())
+  usuarioId      Int
+  tipo           TipoTransacao
+  descricao      String
+  valorCentavos  Int            // Valor positivo guardado em centavos inteiros (ex: R$ 2.000,00 -> 200000)
+  dataTransacao  DateTime
+  chaveUnica     String         // Chave única por usuário para evitar duplicações
+  criadoEm       DateTime       @default(now())
+  atualizadoEm   DateTime       @updatedAt
+
+  // Campos de exclusão lógica (Soft Delete com rastreabilidade)
+  deletadoEm     DateTime?
+  deletadoPorId  Int?
+
+  usuario        Usuario        @relation("UsuarioTransacoes", fields: [usuarioId], references: [id])
+  deletadoPor    Usuario?       @relation("UsuarioExclusoes", fields: [deletadoPorId], references: [id])
+  auditorias     Auditoria[]
+
+  @@unique([usuarioId, chaveUnica], name: "usuario_chave_unica")
+}
+
+model Auditoria {
+  id             Int                @id @default(autoincrement())
+  transacaoId    Int
+  usuarioId      Int
+  tipoAcao       TipoAcaoAuditoria
+  dataAcao       DateTime           @default(now())
+  dadosAlterados Json
+
+  transacao      Transacao          @relation(fields: [transacaoId], references: [id])
+  usuario        Usuario            @relation("UsuarioAuditorias", fields: [usuarioId], references: [id])
 }
