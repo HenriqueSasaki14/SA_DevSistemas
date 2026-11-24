@@ -1,287 +1,150 @@
 import crypto from 'crypto'
+import { prisma } from '../lib/prisma.ts'
+import { AppError } from '../errors/AppError.js'
+import { formatarCentavosParaReal } from '../utils/moeda.js'
 import { registrarAuditoria } from './auditoriaService.js'
 
-/**
- * Formata centavos inteiros para string monetária em Real (ex: 200000 -> "R$ 2.000,00")
- * @param {number} centavos 
- * @returns {string}
- */
-export function formatarCentavosParaReal(centavos) {
-  const valor = (centavos || 0) / 100
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+/** Adiciona o valor formatado em R$ à transação devolvida pela API. */
+function comValorFormatado(transacao) {
+  return { ...transacao, valorFormatado: formatarCentavosParaReal(transacao.valorCentavos) }
+}
+
+/** Gera uma chave de idempotência quando o cliente não envia uma. */
+function gerarChaveUnica() {
+  return crypto.randomUUID()
 }
 
 /**
- * Valida e converte valor monetário para centavos inteiros positivos.
- * Garante a regra: "Cada transação terá um valor positivo guardado em centavos inteiros: R$ 2.000,00 será registrado como 200000"
- * e "impedir valores negativos em campos de valor absoluto".
- * 
- * @param {any} valor - Pode vir como `valorCentavos` (inteiro) ou `valor` (ex: "2000.00" ou 2000)
- * @returns {number} centavos inteiros estritamente positivos
+ * Cria uma transação (dados já validados pelo schema) com idempotência e auditoria atômica.
+ * Uma mesma chaveUnica reenviada pelo mesmo usuário gera 409 em vez de um lançamento duplicado.
  */
-export function validarEConverterCentavos(valorCentavos, valorEmReais) {
-  let centavos
+export async function criarTransacao(usuarioId, { tipo, descricao, valorCentavos, dataTransacao, chaveUnica }) {
+  const chave = chaveUnica ?? gerarChaveUnica()
 
-  if (valorCentavos !== undefined && valorCentavos !== null && valorCentavos !== '') {
-    const parsed = Number(valorCentavos)
-    if (!Number.isInteger(parsed) || parsed <= 0) {
-      throw new Error('O valor em centavos deve ser um número inteiro estritamente positivo (maior que zero).')
-    }
-    centavos = parsed
-  } else if (valorEmReais !== undefined && valorEmReais !== null && valorEmReais !== '') {
-    const parsed = Number(valorEmReais)
-    if (isNaN(parsed) || parsed <= 0) {
-      throw new Error('O valor da transação deve ser positivo (maior que zero). Valores negativos não são permitidos.')
-    }
-    centavos = Math.round(parsed * 100)
-  } else {
-    throw new Error('O valor da transação é obrigatório.')
-  }
-
-  if (centavos <= 0) {
-    throw new Error('O valor da transação deve ser estritamente positivo.')
-  }
-
-  return centavos
-}
-
-/**
- * Valida o tipo de transação (apenas ENTRADA ou SAIDA)
- * @param {string} tipo 
- * @returns {'ENTRADA' | 'SAIDA'}
- */
-export function validarTipoTransacao(tipo) {
-  if (!tipo) throw new Error('O tipo de transação é obrigatório.')
-  const normalizado = String(tipo).trim().toUpperCase()
-  if (normalizado !== 'ENTRADA' && normalizado !== 'SAIDA') {
-    throw new Error('Tipo de transação inválido. Deve ser ENTRADA ou SAIDA.')
-  }
-  return normalizado
-}
-
-/**
- * Gera uma chave única padrão caso não seja informada pelo cliente
- */
-export function gerarChaveUnica(usuarioId, tipo, valorCentavos, dataTransacao, descricao) {
-  const base = `${usuarioId}-${tipo}-${valorCentavos}-${dataTransacao}-${descricao || ''}-${Date.now()}`
-  return crypto.createHash('sha256').update(base).digest('hex').substring(0, 32)
-}
-
-/**
- * Criação de transação com verificação de idempotência (chave única) e registro de auditoria
- */
-export async function criarTransacao({ prisma, usuarioId, tipo, descricao, valorCentavos, valor, dataTransacao, chaveUnica }) {
-  const tipoValido = validarTipoTransacao(tipo)
-  const centavosValidos = validarEConverterCentavos(valorCentavos, valor)
-
-  if (!descricao || String(descricao).trim().length === 0) {
-    throw new Error('A descrição da transação é obrigatória.')
-  }
-
-  const dataValida = dataTransacao ? new Date(dataTransacao) : new Date()
-  if (isNaN(dataValida.getTime())) {
-    throw new Error('Data da transação inválida.')
-  }
-
-  const chave = chaveUnica && String(chaveUnica).trim().length > 0 
-    ? String(chaveUnica).trim() 
-    : gerarChaveUnica(usuarioId, tipoValido, centavosValidos, dataValida.toISOString(), descricao)
-
-  // Validação de Duplicidade / Idempotência:
-  // "Uma chave única por usuário evitará lançamentos duplicados quando o mesmo cadastro for reenviado."
-  const existente = await prisma.transacao.findFirst({
-    where: {
-      usuarioId,
-      chaveUnica: chave,
-    },
+  const existente = await prisma.transacao.findUnique({
+    where: { usuario_chave_unica: { usuarioId, chaveUnica: chave } },
   })
-
   if (existente) {
-    const erroDuplicidade = new Error('Lançamento duplicado detectado. Uma transação com esta chave única já foi cadastrada.')
-    erroDuplicidade.statusCode = 409
-    erroDuplicidade.transacaoExistente = existente
-    throw erroDuplicidade
+    throw new AppError(
+      'Lançamento duplicado detectado. Uma transação com esta chave única já foi cadastrada.',
+      409,
+      { transacaoExistente: comValorFormatado(existente) },
+    )
   }
 
-  // Executa criação e auditoria dentro de transação atômica
-  const novaTransacao = await prisma.$transaction(async (tx) => {
-    const t = await tx.transacao.create({
-      data: {
+  try {
+    const nova = await prisma.$transaction(async (tx) => {
+      const transacao = await tx.transacao.create({
+        data: {
+          usuarioId,
+          tipo,
+          descricao,
+          valorCentavos,
+          dataTransacao: dataTransacao ?? new Date(),
+          chaveUnica: chave,
+        },
+      })
+
+      await registrarAuditoria(tx, {
+        transacaoId: transacao.id,
         usuarioId,
-        tipo: tipoValido,
-        descricao: String(descricao).trim(),
-        valorCentavos: centavosValidos,
-        dataTransacao: dataValida,
-        chaveUnica: chave,
-      },
+        tipoAcao: 'CRIACAO',
+        dadosAlterados: {
+          tipo: transacao.tipo,
+          descricao: transacao.descricao,
+          valorCentavos: transacao.valorCentavos,
+          valorFormatado: formatarCentavosParaReal(transacao.valorCentavos),
+          dataTransacao: transacao.dataTransacao,
+          chaveUnica: transacao.chaveUnica,
+        },
+      })
+
+      return transacao
     })
 
-    await registrarAuditoria({
-      prismaClient: tx,
-      transacaoId: t.id,
-      usuarioId,
-      tipoAcao: 'CRIACAO',
-      dadosAlterados: {
-        tipo: t.tipo,
-        descricao: t.descricao,
-        valorCentavos: t.valorCentavos,
-        valorFormatado: formatarCentavosParaReal(t.valorCentavos),
-        dataTransacao: t.dataTransacao,
-        chaveUnica: t.chaveUnica,
-      },
-    })
-
-    return t
-  })
-
-  return {
-    ...novaTransacao,
-    valorFormatado: formatarCentavosParaReal(novaTransacao.valorCentavos),
-  }
-}
-
-/**
- * Listagem comum: não traz transações excluídas logicamente
- */
-export async function listarTransacoesAtivas({ prisma, usuarioId }) {
-  const transacoes = await prisma.transacao.findMany({
-    where: {
-      usuarioId,
-      deletadoEm: null, // Soft Delete respeitado
-    },
-    orderBy: {
-      dataTransacao: 'desc',
-    },
-  })
-
-  return transacoes.map((t) => ({
-    ...t,
-    valorFormatado: formatarCentavosParaReal(t.valorCentavos),
-  }))
-}
-
-/**
- * Busca detalhes de uma transação ativa
- */
-export async function buscarTransacaoPorId({ prisma, usuarioId, id }) {
-  const transacao = await prisma.transacao.findFirst({
-    where: {
-      id: Number(id),
-      usuarioId,
-      deletadoEm: null,
-    },
-  })
-
-  if (!transacao) {
-    const err = new Error('Transação não encontrada.')
-    err.statusCode = 404
+    return comValorFormatado(nova)
+  } catch (err) {
+    // Duas requisições simultâneas com a mesma chave: a constraint do banco barra a segunda
+    if (err.code === 'P2002') {
+      throw new AppError('Lançamento duplicado detectado. Uma transação com esta chave única já foi cadastrada.', 409)
+    }
     throw err
   }
-
-  return {
-    ...transacao,
-    valorFormatado: formatarCentavosParaReal(transacao.valorCentavos),
-  }
 }
 
-/**
- * Edição de transação com registro de auditoria
- */
-export async function atualizarTransacao({ prisma, usuarioId, id, dados }) {
-  const transacaoAtual = await buscarTransacaoPorId({ prisma, usuarioId, id })
+/** Lista as transações ativas (excluídas logicamente não aparecem). */
+export async function listarTransacoesAtivas(usuarioId) {
+  const transacoes = await prisma.transacao.findMany({
+    where: { usuarioId, deletadoEm: null },
+    orderBy: [{ dataTransacao: 'desc' }, { id: 'desc' }],
+  })
+  return transacoes.map(comValorFormatado)
+}
 
-  const updateData = {}
+/** Busca uma transação ativa do usuário ou lança 404. */
+export async function buscarTransacaoPorId(usuarioId, id) {
+  const transacao = await prisma.transacao.findFirst({
+    where: { id, usuarioId, deletadoEm: null },
+  })
+  if (!transacao) throw new AppError('Transação não encontrada.', 404)
+  return comValorFormatado(transacao)
+}
+
+/** Monta o diff { campo: { antes, depois } } apenas dos campos realmente alterados. */
+function calcularDiff(atual, novosDados) {
   const diff = {}
-
-  if (dados.tipo !== undefined) {
-    const tipoValido = validarTipoTransacao(dados.tipo)
-    if (tipoValido !== transacaoAtual.tipo) {
-      updateData.tipo = tipoValido
-      diff.tipo = { antes: transacaoAtual.tipo, depois: tipoValido }
-    }
+  for (const [campo, novoValor] of Object.entries(novosDados)) {
+    const valorAtual = atual[campo]
+    const igual = novoValor instanceof Date
+      ? novoValor.getTime() === new Date(valorAtual).getTime()
+      : novoValor === valorAtual
+    if (!igual) diff[campo] = { antes: valorAtual, depois: novoValor }
   }
 
-  if (dados.descricao !== undefined) {
-    const descTrim = String(dados.descricao).trim()
-    if (!descTrim) throw new Error('A descrição não pode ser vazia.')
-    if (descTrim !== transacaoAtual.descricao) {
-      updateData.descricao = descTrim
-      diff.descricao = { antes: transacaoAtual.descricao, depois: descTrim }
-    }
+  if (diff.valorCentavos) {
+    diff.valorCentavos.antesFormatado = formatarCentavosParaReal(diff.valorCentavos.antes)
+    diff.valorCentavos.depoisFormatado = formatarCentavosParaReal(diff.valorCentavos.depois)
   }
+  return diff
+}
 
-  if (dados.valorCentavos !== undefined || dados.valor !== undefined) {
-    const centavos = validarEConverterCentavos(dados.valorCentavos, dados.valor)
-    if (centavos !== transacaoAtual.valorCentavos) {
-      updateData.valorCentavos = centavos
-      diff.valorCentavos = {
-        antes: transacaoAtual.valorCentavos,
-        depois: centavos,
-        antesFormatado: formatarCentavosParaReal(transacaoAtual.valorCentavos),
-        depoisFormatado: formatarCentavosParaReal(centavos),
-      }
-    }
-  }
+/** Edita uma transação e grava o diff na auditoria, de forma atômica. */
+export async function atualizarTransacao(usuarioId, id, dados) {
+  const atual = await buscarTransacaoPorId(usuarioId, id)
+  const diff = calcularDiff(atual, dados)
 
-  if (dados.dataTransacao !== undefined) {
-    const novaData = new Date(dados.dataTransacao)
-    if (isNaN(novaData.getTime())) throw new Error('Data de transação inválida.')
-    updateData.dataTransacao = novaData
-    diff.dataTransacao = { antes: transacaoAtual.dataTransacao, depois: novaData }
-  }
+  if (Object.keys(diff).length === 0) return atual
 
-  // Se não houve alterações reais, retorna a transação existente
-  if (Object.keys(updateData).length === 0) {
-    return transacaoAtual
-  }
+  const dadosAlterados = Object.fromEntries(Object.entries(diff).map(([campo, { depois }]) => [campo, depois]))
 
-  const transacaoAtualizada = await prisma.$transaction(async (tx) => {
-    const t = await tx.transacao.update({
-      where: { id: transacaoAtual.id },
-      data: updateData,
-    })
-
-    await registrarAuditoria({
-      prismaClient: tx,
-      transacaoId: t.id,
-      usuarioId,
-      tipoAcao: 'EDICAO',
-      dadosAlterados: diff,
-    })
-
-    return t
+  const atualizada = await prisma.$transaction(async (tx) => {
+    const transacao = await tx.transacao.update({ where: { id: atual.id }, data: dadosAlterados })
+    await registrarAuditoria(tx, { transacaoId: transacao.id, usuarioId, tipoAcao: 'EDICAO', dadosAlterados: diff })
+    return transacao
   })
 
-  return {
-    ...transacaoAtualizada,
-    valorFormatado: formatarCentavosParaReal(transacaoAtualizada.valorCentavos),
-  }
+  return comValorFormatado(atualizada)
 }
 
 /**
- * Exclusão Lógica (Soft Delete):
- * "O sistema não deve permitir a exclusão física de registros (apenas marcação de "excluído") para manter a rastreabilidade (H1)."
- * "A exclusão será por Soft Delete: o sistema marca a data e o responsável, sem apagar o registro do banco."
+ * Exclusão lógica (Regra de Ouro - H1): marca data e responsável, nunca apaga o registro.
+ * O banco também bloqueia DELETE físico via trigger (ver migration inicial).
  */
-export async function excluirTransacaoSoftDelete({ prisma, usuarioId, id }) {
-  const transacao = await buscarTransacaoPorId({ prisma, usuarioId, id })
+export async function excluirTransacaoSoftDelete(usuarioId, id) {
+  const transacao = await buscarTransacaoPorId(usuarioId, id)
 
   await prisma.$transaction(async (tx) => {
     await tx.transacao.update({
       where: { id: transacao.id },
-      data: {
-        deletadoEm: new Date(),
-        deletadoPorId: usuarioId,
-      },
+      data: { deletadoEm: new Date(), deletadoPorId: usuarioId },
     })
 
-    await registrarAuditoria({
-      prismaClient: tx,
+    await registrarAuditoria(tx, {
       transacaoId: transacao.id,
       usuarioId,
       tipoAcao: 'EXCLUSAO',
       dadosAlterados: {
-        motivo: 'Exclusão lógica via interface (Soft Delete)',
+        motivo: 'Exclusão lógica (Soft Delete)',
         estadoNoMomentoDaExclusao: {
           tipo: transacao.tipo,
           descricao: transacao.descricao,
@@ -296,43 +159,38 @@ export async function excluirTransacaoSoftDelete({ prisma, usuarioId, id }) {
 }
 
 /**
- * Cálculo centralizado do saldo pelo backend:
- * "O frontend não calculará o saldo por conta própria: exibirá os totais enviados pela API."
- * "Entrada soma no saldo e saída subtrai. O saldo será a soma das entradas ativas menos a soma das saídas ativas."
- * "Na listagem comum e no cálculo do saldo, transações excluídas não aparecerão."
+ * Saldo consolidado calculado no backend: entradas ativas menos saídas ativas.
+ * O frontend apenas exibe estes valores.
  */
-export async function calcularDashboard({ prisma, usuarioId }) {
-  const baseWhere = {
-    usuarioId,
-    deletadoEm: null, // Exclusões lógicas não entram no saldo
-  }
+export async function calcularDashboard(usuarioId) {
+  const ativas = { usuarioId, deletadoEm: null }
 
-  const [entradasAgregadas, saidasAgregadas, quantidadeAtivas] = await Promise.all([
-    prisma.transacao.aggregate({
-      where: { ...baseWhere, tipo: 'ENTRADA' },
-      _sum: { valorCentavos: true },
-    }),
-    prisma.transacao.aggregate({
-      where: { ...baseWhere, tipo: 'SAIDA' },
-      _sum: { valorCentavos: true },
-    }),
-    prisma.transacao.count({
-      where: baseWhere,
-    }),
+  const [entradas, saidas, totalTransacoesAtivas] = await Promise.all([
+    prisma.transacao.aggregate({ where: { ...ativas, tipo: 'ENTRADA' }, _sum: { valorCentavos: true } }),
+    prisma.transacao.aggregate({ where: { ...ativas, tipo: 'SAIDA' }, _sum: { valorCentavos: true } }),
+    prisma.transacao.count({ where: ativas }),
   ])
 
-  const receitasCentavos = entradasAgregadas._sum.valorCentavos || 0
-  const despesasCentavos = saidasAgregadas._sum.valorCentavos || 0
+  const receitasCentavos = entradas._sum.valorCentavos ?? 0
+  const despesasCentavos = saidas._sum.valorCentavos ?? 0
   const saldoTotalCentavos = receitasCentavos - despesasCentavos
 
   return {
     saldoTotalCentavos,
     receitasCentavos,
     despesasCentavos,
-    totalTransacoesAtivas: quantidadeAtivas,
+    totalTransacoesAtivas,
     saldoTotal: formatarCentavosParaReal(saldoTotalCentavos),
     receitas: formatarCentavosParaReal(receitasCentavos),
     despesas: formatarCentavosParaReal(despesasCentavos),
-    investimentos: 'R$ 0,00', // Campo reservado para extensões futuras
   }
+}
+
+/**
+ * Garante que a transação pertence ao usuário, incluindo as excluídas logicamente
+ * (a auditoria de um registro excluído continua consultável - rastreabilidade).
+ */
+export async function garantirPosseTransacao(usuarioId, id) {
+  const existe = await prisma.transacao.count({ where: { id, usuarioId } })
+  if (!existe) throw new AppError('Transação não encontrada.', 404)
 }

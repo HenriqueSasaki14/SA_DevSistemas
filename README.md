@@ -1,7 +1,16 @@
 # SafeCash – Sistema de Tesouraria Integrada (FinTech Flow)
 
-> **Situação de Aprendizagem | Prof. Willer Barros | Arquiteto de Software**  
+> **Situação de Aprendizagem – Desenvolvimento de Sistemas | Prof. Willer Barros**  
 > Core Engine financeiro fullstack para controle de fluxo de caixa, integridade bancária e rastreabilidade com auditoria completa.
+
+### Integrantes
+
+| Nome | GitHub |
+| :--- | :--- |
+| _preencher_ | _@usuario_ |
+| _preencher_ | _@usuario_ |
+| _preencher_ | _@usuario_ |
+| _preencher_ | _@usuario_ |
 
 ---
 
@@ -11,19 +20,30 @@ A **SafeCash** é uma plataforma de gestão de tesouraria desenvolvida para pequ
 - **Autenticação Segura**: Criptografia de senhas com **Bcrypt** e sessões stateless via **JWT (JSON Web Token)**.
 - **Precisão Bancária**: Valores armazenados como **centavos inteiros positivos** (`Int`), eliminando erros de arredondamento de ponto flutuante.
 - **Prevenção de Duplicidade**: Chave única por usuário (`chaveUnica`) garantindo idempotência e evitando lançamentos duplicados por duplo clique ou reenvio acidental.
-- **Regra de Ouro (H1 - Soft Delete)**: Proibição estrita de exclusão física de registros do banco de dados; toda exclusão é lógica, marcando a data e o usuário responsável.
-- **Trilha de Auditoria Contínua**: Registro imutável de criação, edição e exclusão de qualquer transação com o diff das alterações e autoria.
+- **Regra de Ouro (H1 - Soft Delete)**: Proibição estrita de exclusão física de registros; toda exclusão é lógica, marcando a data e o usuário responsável. A regra é garantida **também pelo banco** (triggers), não só pela API.
+- **Trilha de Auditoria Contínua**: Registro imutável (append-only) de criação, edição e exclusão de qualquer transação com o diff das alterações e autoria.
+- **Validação de Esquemas (Zod)**: Todo corpo de requisição é validado por schema antes de chegar às regras de negócio (valores negativos, decimais, tipos errados e campos desconhecidos são recusados).
 - **Cálculo Consolidado Centralizado**: O frontend não calcula saldos; exibe os totais consolidados e formatados pela API REST.
 
 ---
 
 ## 2. Justificativa da Stack Tecnológica (H2, H3, H4)
 
-O ecossistema **Fullstack JavaScript** foi selecionado estrategicamente:
-- **Backend (Node.js + Express)**: Arquitetura baseada em eventos e I/O não bloqueante, ideal para APIs financeiras de alta concorrência. Unifica a linguagem entre cliente e servidor, agilizando validações e reduzindo custo de contexto.
-- **Prisma ORM + PostgreSQL**: Tipagem estática de ponta a ponta, migrations seguras e suporte nativo a transações atômicas ACID (`$transaction`), cruciais para a consistência bancária e auditoria.
-- **Frontend (React + Vite)**: Interface administrativa responsiva (Web e Mobile), renderização reativa do dashboard em tempo real e experiência de uso veloz e moderna.
-- **Segurança (Bcrypt & JWT)**: Práticas consolidadas de mercado com hash salgado de senhas e autorização baseada em tokens com expiração configurável.
+A SafeCash precisa atender pequenas empresas **no computador e no celular**, com uma equipe pequena e prazo curto. O **JavaScript Fullstack (Node.js + React)** foi escolhido por estes motivos:
+
+**Multiplataforma**
+- **Uma linguagem só, do servidor ao navegador**: a mesma equipe mantém backend e frontend, sem trocar de linguagem nem duplicar conhecimento. Regras como "valor em centavos inteiros" são escritas uma vez e entendidas pelos dois lados.
+- **Web e mobile com o mesmo código**: o React gera uma interface responsiva que roda em qualquer navegador (desktop, tablet, celular), sem instalar nada. Se a SafeCash quiser um app nativo no futuro, o **React Native** reaproveita componentes, lógica e a mesma API REST.
+- **API REST em JSON**: o formato nativo do JavaScript. Qualquer cliente (web, app, parceiro) consome a API sem conversões.
+
+**Requisitos técnicos**
+- **Node.js + Express**: I/O não bloqueante, adequado a muitas requisições curtas e simultâneas (consultas de saldo, lançamentos). O Express 5 encaminha erros de funções `async` direto para um tratador central.
+- **Prisma ORM + PostgreSQL**: banco relacional com transações ACID (`$transaction`) — a transação e o seu registro de auditoria são gravados juntos ou não são gravados. Migrations versionadas e triggers garantem a Regra de Ouro no próprio banco.
+- **Zod**: validação declarativa de schemas, cumprindo o requisito de segurança de dados.
+- **Bcrypt + JWT**: hash de senhas com salt e autenticação stateless com expiração configurável.
+
+**Mercado**
+- O ecossistema npm é o maior do mundo e o JavaScript Fullstack é amplamente adotado pelas empresas de tecnologia da Grande Florianópolis, o que facilita contratação e manutenção.
 
 ---
 
@@ -72,6 +92,26 @@ erDiagram
     }
 ```
 
+### 3.1. Rastreabilidade: quem criou e quem alterou
+
+| Pergunta | Onde está a resposta |
+| :--- | :--- |
+| Quem criou a transação e quando? | `Transacao.usuarioId` + `Transacao.criadoEm` e a entrada `CRIACAO` da `Auditoria` |
+| Quem alterou, quando e o quê? | Entradas `EDICAO` da `Auditoria` (`usuarioId`, `dataAcao`, diff `antes/depois`) e `Transacao.atualizadoEm` |
+| Quem excluiu e quando? | `Transacao.deletadoPorId` + `Transacao.deletadoEm` e a entrada `EXCLUSAO` da `Auditoria` |
+
+### 3.2. Regra de Ouro garantida no banco
+
+A migration inicial ([`backend/prisma/migrations`](backend/prisma/migrations)) cria triggers no PostgreSQL. Mesmo com SQL manual, fora da API:
+
+| Tentativa | Resultado |
+| :--- | :--- |
+| `DELETE FROM "Transacao"` | **Bloqueado** – exclusão física proibida |
+| Alterar ou "ressuscitar" uma transação já excluída | **Bloqueado** – registro excluído fica congelado |
+| `UPDATE` ou `DELETE` em `"Auditoria"` | **Bloqueado** – auditoria é somente inserção |
+
+Além disso, todas as chaves estrangeiras usam `ON DELETE RESTRICT`: nada é apagado em cascata.
+
 ---
 
 ## 4. Documentação das Rotas da API REST (H6, H10)
@@ -79,10 +119,27 @@ erDiagram
 Todas as rotas (exceto registro e login) exigem o header:
 `Authorization: Bearer <token_jwt>`
 
+**Formato dos erros** (toda resposta de erro segue este padrão):
+```json
+{
+  "erro": "O valor da transação deve ser maior que zero. Valores negativos não são permitidos.",
+  "erros": [{ "campo": "valorCentavos", "mensagem": "..." }]
+}
+```
+
+| Status | Quando |
+| :---: | :--- |
+| 400 | Dados inválidos (schema), ID inválido, JSON malformado |
+| 401 | Token ausente, inválido ou expirado; login incorreto |
+| 404 | Transação inexistente, excluída ou de outro usuário |
+| 409 | `chaveUnica` repetida ou e-mail já cadastrado |
+| 500 | Erro interno (detalhes ficam só no log do servidor) |
+
 ### 4.1. Autenticação
 
 #### `POST /api/auth/register`
 Cadastra um novo usuário criptografando a senha com `bcrypt` (10 rounds).
+Regras: `nome` com 3+ caracteres, `email` válido (único, retorna **409** se repetido), `senha` com 6+ caracteres. `cpf` e `telefone` são opcionais.
 - **Body:**
   ```json
   {
@@ -110,7 +167,7 @@ Autentica o usuário comparando a senha via `bcrypt.compare`.
     "senha": "senhaSegura123"
   }
   ```
-- **Resposta (200):** Retorna o JWT e os dados do usuário.
+- **Resposta (200):** Retorna o JWT e os dados do usuário. Credenciais erradas retornam **401**.
 
 #### `GET /api/me`
 Retorna os dados da sessão do usuário autenticado.
@@ -122,8 +179,22 @@ Retorna os dados da sessão do usuário autenticado.
 #### `GET /api/transacoes`
 Lista todas as transações ativas do usuário logado (exclui automaticamente registros com soft delete).
 
+#### `GET /api/transacoes/:id`
+Retorna uma transação ativa do usuário (404 se não existir ou estiver excluída).
+
 #### `POST /api/transacoes`
 Cria um novo lançamento com validação estrita de centavos inteiros e prevenção de duplicidade.
+
+| Campo | Regra |
+| :--- | :--- |
+| `tipo` | Obrigatório. `ENTRADA` ou `SAIDA` |
+| `descricao` | Obrigatório. 1 a 255 caracteres |
+| `valorCentavos` | Obrigatório. **Número inteiro > 0** e ≤ 2.147.483.647 (R$ 21.474.836,47). Recusa negativos, zero, decimais, strings e booleanos |
+| `dataTransacao` | Opcional (padrão: agora). `AAAA-MM-DD` ou ISO 8601 |
+| `chaveUnica` | Opcional (gerada automaticamente). Até 100 caracteres |
+
+Campos não listados (ex: `usuarioId`, `deletadoEm`) são **recusados** com 400.
+
 - **Body:**
   ```json
   {
@@ -139,6 +210,7 @@ Cria um novo lançamento com validação estrita de centavos inteiros e prevenç
 
 #### `PUT /api/transacoes/:id`
 Edita um lançamento e gera uma entrada na trilha de auditoria (`tipoAcao: 'EDICAO'`) contendo o diff dos dados alterados.
+Aceita qualquer combinação de `tipo`, `descricao`, `valorCentavos` e `dataTransacao` (mesmas regras do POST; ao menos um campo). A `chaveUnica` não pode ser alterada. Se nada mudar, nenhuma auditoria é gravada.
 
 #### `DELETE /api/transacoes/:id`
 Executa o **Soft Delete** (Regra de Ouro):
@@ -147,7 +219,7 @@ Executa o **Soft Delete** (Regra de Ouro):
 - Registra `tipoAcao: 'EXCLUSAO'` na tabela `Auditoria`.
 
 #### `GET /api/transacoes/:id/auditoria`
-Retorna toda a trilha de auditoria da transação (quem alterou, data e o diff detalhado).
+Retorna toda a trilha de auditoria da transação (quem alterou, data e o diff detalhado), **inclusive de transações já excluídas**.
 
 ---
 
@@ -164,14 +236,15 @@ Retorna os totais consolidados calculados diretamente pela API:
     "totalTransacoesAtivas": 5,
     "saldoTotal": "R$ 3.000,00",
     "receitas": "R$ 5.000,00",
-    "despesas": "R$ 2.000,00",
-    "investimentos": "R$ 0,00"
+    "despesas": "R$ 2.000,00"
   }
   ```
 
 ---
 
 ## 5. Metodologia Ágil e Cronograma de Sprints (H8)
+
+📋 **Quadro do projeto (GitHub Projects):** _colar aqui o link do quadro_
 
 O ciclo de desenvolvimento foi organizado em 5 sprints incrementais:
 
@@ -188,7 +261,7 @@ O ciclo de desenvolvimento foi organizado em 5 sprints incrementais:
 ## 6. Como Executar o Projeto
 
 ### Pré-requisitos
-- Node.js 20+ instalado
+- **Node.js 22.18 ou superior** (o backend importa o Prisma Client gerado em TypeScript, recurso nativo do Node a partir dessa versão)
 - PostgreSQL rodando localmente ou via nuvem (Neon / Supabase / Render / Railway)
 
 ### Passo a Passo
@@ -199,22 +272,20 @@ O ciclo de desenvolvimento foi organizado em 5 sprints incrementais:
    ```
 
 2. **Configurar as Variáveis de Ambiente:**
-   Crie o arquivo `backend/.env` (baseado em `backend/.env.example`):
+   Copie `backend/.env.example` para `backend/.env` e ajuste os valores:
    ```env
    PORT=3001
-   JWT_SECRET=sua_chave_secreta_jwt_aqui
    DATABASE_URL=postgres://postgres:postgres@localhost:5432/safecash
+   JWT_SECRET=sua_chave_secreta_jwt_aqui
    JWT_EXPIRES_IN=7d
+   CORS_ORIGIN=http://localhost:5173
    ```
 
-3. **Gerar o Prisma Client e Executar Migrations:**
+3. **Criar as tabelas no banco (migrations):**
    ```bash
-   cd backend
-   npx prisma generate
-   # Se já estiver com o PostgreSQL rodando:
-   # npx prisma migrate deploy
-   cd ..
+   npm run db:migrate --prefix backend
    ```
+   O Prisma Client é gerado automaticamente no `npm install` (script `postinstall`).
 
 4. **Iniciar Aplicação (Backend + Frontend):**
    ```bash
@@ -222,3 +293,36 @@ O ciclo de desenvolvimento foi organizado em 5 sprints incrementais:
    ```
    - Frontend: `http://localhost:5173`
    - Backend API: `http://localhost:3001`
+
+5. **Rodar os testes automatizados do backend:**
+   ```bash
+   npm test --prefix backend
+   ```
+
+---
+
+## 7. Estrutura do Projeto
+
+```
+backend/
+├── prisma/
+│   ├── schema.prisma            # Modelo relacional (Usuario, Transacao, Auditoria)
+│   └── migrations/              # Migration inicial + triggers da Regra de Ouro
+├── src/
+│   ├── server.js                # Inicialização do servidor
+│   ├── app.js                   # Configuração do Express (CORS, JSON, rotas, erros)
+│   ├── routes/                  # authRoutes, transacaoRoutes
+│   ├── validators/schemas.js    # Schemas Zod (validação de entrada)
+│   ├── services/                # Regras de negócio (auth, transações, auditoria)
+│   ├── middlewares/             # autenticação JWT e tratamento central de erros
+│   ├── errors/AppError.js       # Erro de negócio com status HTTP
+│   ├── utils/moeda.js           # Formatação de centavos em R$
+│   └── lib/prisma.ts            # Instância do Prisma Client
+└── test/                        # Testes (node:test)
+frontend/
+└── src/
+    ├── pages/                   # Login, Cadastro, Dashboard
+    ├── contexts/                # Sessão do usuário (JWT)
+    ├── services/api.js          # Cliente da API REST
+    └── utils/moeda.js           # Máscara de valor em R$
+```

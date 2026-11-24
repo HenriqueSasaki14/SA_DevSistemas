@@ -58,6 +58,6 @@ export async function autenticar(req, res, next) {
     req.usuario = usuario
     next()
   } catch (err) {
-    return res.status(500).json({ erro: 'Falha na autenticação do usuário.', detalhe: err.message })
+    return next(err)
   }
 }

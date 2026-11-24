@@ -50,8 +50,8 @@ model Transacao {
   deletadoEm     DateTime?
   deletadoPorId  Int?
 
-  usuario        Usuario        @relation("UsuarioTransacoes", fields: [usuarioId], references: [id])
-  deletadoPor    Usuario?       @relation("UsuarioExclusoes", fields: [deletadoPorId], references: [id])
+  usuario        Usuario        @relation("UsuarioTransacoes", fields: [usuarioId], references: [id], onDelete: Restrict)
+  deletadoPor    Usuario?       @relation("UsuarioExclusoes", fields: [deletadoPorId], references: [id], onDelete: Restrict)
   auditorias     Auditoria[]
 
   @@unique([usuarioId, chaveUnica], name: "usuario_chave_unica")
@@ -65,6 +65,7 @@ model Auditoria {
   dataAcao       DateTime           @default(now())
   dadosAlterados Json
 
-  transacao      Transacao          @relation(fields: [transacaoId], references: [id])
-  usuario        Usuario            @relation("UsuarioAuditorias", fields: [usuarioId], references: [id])
+  // Restrict: a trilha de auditoria nunca pode ser apagada em cascata
+  transacao      Transacao          @relation(fields: [transacaoId], references: [id], onDelete: Restrict)
+  usuario        Usuario            @relation("UsuarioAuditorias", fields: [usuarioId], references: [id], onDelete: Restrict)
 }

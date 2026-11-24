@@ -1,47 +1,27 @@
 /**
  * Serviço de Auditoria do SafeCash
- * Registra a rastreabilidade completa de criação, edição e exclusão de transações.
+ * Registra a rastreabilidade de criação, edição e exclusão de transações.
+ * A tabela Auditoria é append-only: o banco recusa UPDATE e DELETE (trigger).
  */
+import { prisma } from '../lib/prisma.ts'
 
 /**
- * Registra uma entrada na tabela Auditoria
- * @param {object} params
- * @param {object} params.prismaClient - Instância do Prisma (ou transação tx)
- * @param {number} params.transacaoId - ID da transação afetada
- * @param {number} params.usuarioId - ID do usuário que executou a ação
- * @param {'CRIACAO' | 'EDICAO' | 'EXCLUSAO'} params.tipoAcao - Tipo da ação executada
- * @param {object} params.dadosAlterados - Snapshot ou diff dos dados alterados
+ * Registra uma entrada de auditoria. Recebe o cliente da transação atômica (tx),
+ * para que a alteração e o seu registro sejam gravados juntos ou não sejam gravados.
+ * @param {object} tx - Cliente Prisma dentro de $transaction
+ * @param {{ transacaoId: number, usuarioId: number, tipoAcao: 'CRIACAO'|'EDICAO'|'EXCLUSAO', dadosAlterados: object }} dados
  */
-export async function registrarAuditoria({ prismaClient, transacaoId, usuarioId, tipoAcao, dadosAlterados }) {
-  if (!transacaoId || !usuarioId || !tipoAcao) {
-    throw new Error('Parâmetros obrigatórios para auditoria ausentes.')
-  }
-
-  return await prismaClient.auditoria.create({
-    data: {
-      transacaoId,
-      usuarioId,
-      tipoAcao,
-      dataAcao: new Date(),
-      dadosAlterados: typeof dadosAlterados === 'string' ? JSON.parse(dadosAlterados) : dadosAlterados,
-    },
+export function registrarAuditoria(tx, { transacaoId, usuarioId, tipoAcao, dadosAlterados }) {
+  return tx.auditoria.create({
+    data: { transacaoId, usuarioId, tipoAcao, dadosAlterados },
   })
 }
 
-/**
- * Consulta a trilha de auditoria de uma transação específica
- * @param {object} params
- * @param {object} params.prismaClient
- * @param {number} params.transacaoId
- */
-export async function listarAuditoriaTransacao({ prismaClient, transacaoId }) {
-  return await prismaClient.auditoria.findMany({
-    where: { transacaoId: Number(transacaoId) },
-    include: {
-      usuario: {
-        select: { id: true, nome: true, email: true },
-      },
-    },
-    orderBy: { dataAcao: 'desc' },
+/** Trilha de auditoria de uma transação, da ação mais recente para a mais antiga. */
+export function listarAuditoriaTransacao(transacaoId) {
+  return prisma.auditoria.findMany({
+    where: { transacaoId },
+    include: { usuario: { select: { id: true, nome: true, email: true } } },
+    orderBy: [{ dataAcao: 'desc' }, { id: 'desc' }],
   })
 }

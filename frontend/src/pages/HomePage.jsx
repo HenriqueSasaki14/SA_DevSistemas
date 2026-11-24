@@ -3,14 +3,25 @@ import { useNavigate } from 'react-router-dom'
 import './HomePage.css'
 import logo from '../assets/1.png'
 import { api } from '../services/api'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/auth'
 import Skeleton from '../components/ui/Skeleton'
+import { centavosDoTexto, formatarCentavos } from '../utils/moeda'
 
 function saudacao() {
   const h = new Date().getHours()
   if (h < 12) return 'Bom dia'
   if (h < 18) return 'Boa tarde'
   return 'Boa noite'
+}
+
+// Data de hoje no fuso local, no formato AAAA-MM-DD (usado no <input type="date">)
+function hojeISO() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function buscarDadosDashboard() {
+  return Promise.all([api.dashboard(), api.transacoes()])
 }
 
 function dataFormatada() {
@@ -28,7 +39,7 @@ export default function HomePage() {
 
   const [dashboard, setDashboard] = useState(null)
   const [transacoes, setTransacoes] = useState([])
-  const [carregando, setCarregando] = useState(false)
+  const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
 
@@ -40,8 +51,8 @@ export default function HomePage() {
   // Estado do formulário
   const [formTipo, setFormTipo] = useState('ENTRADA')
   const [formDescricao, setFormDescricao] = useState('')
-  const [formValor, setFormValor] = useState('')
-  const [formData, setFormData] = useState(new Date().toISOString().split('T')[0])
+  const [formValorCentavos, setFormValorCentavos] = useState(0)
+  const [formData, setFormData] = useState(hojeISO)
   const [formChaveUnica, setFormChaveUnica] = useState('')
   const [formErro, setFormErro] = useState('')
   const [salvando, setSalvando] = useState(false)
@@ -57,24 +68,32 @@ export default function HomePage() {
   const [carregandoAuditoria, setCarregandoAuditoria] = useState(false)
 
   // Carrega Dashboard e Transações da API
-  const carregarDados = useCallback(async () => {
-    if (!usuario) return
-    setCarregando(true)
+  // (o saldo vem pronto da API; o frontend apenas exibe)
+  const aplicarDados = useCallback(([dash, trans]) => {
+    setDashboard(dash)
+    setTransacoes(trans)
     setErro('')
-    try {
-      const [dash, trans] = await Promise.all([api.dashboard(), api.transacoes()])
-      setDashboard(dash)
-      setTransacoes(trans)
-    } catch (e) {
-      setErro(e.message || 'Erro ao carregar dados do servidor.')
-    } finally {
-      setCarregando(false)
-    }
-  }, [usuario])
+  }, [])
 
+  const aplicarErro = useCallback((e) => {
+    setErro(e.message || 'Erro ao carregar dados do servidor.')
+  }, [])
+
+  // Recarrega após criar, editar ou excluir (saldo atualizado automaticamente)
+  const carregarDados = useCallback(
+    () => buscarDadosDashboard().then(aplicarDados).catch(aplicarErro),
+    [aplicarDados, aplicarErro],
+  )
+
+  // Carga inicial: o setState acontece apenas nos callbacks da Promise
   useEffect(() => {
-    carregarDados()
-  }, [carregarDados])
+    let ativo = true
+    buscarDadosDashboard()
+      .then((dados) => ativo && aplicarDados(dados))
+      .catch((e) => ativo && aplicarErro(e))
+      .finally(() => ativo && setCarregando(false))
+    return () => { ativo = false }
+  }, [aplicarDados, aplicarErro])
 
   // Abre modal para criação
   const abrirModalCriar = (tipoInicial = 'ENTRADA') => {
@@ -82,8 +101,8 @@ export default function HomePage() {
     setTransacaoSelecionada(null)
     setFormTipo(tipoInicial)
     setFormDescricao('')
-    setFormValor('')
-    setFormData(new Date().toISOString().split('T')[0])
+    setFormValorCentavos(0)
+    setFormData(hojeISO())
     setFormChaveUnica(`TX-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`)
     setFormErro('')
     setModalAberto(true)
@@ -95,9 +114,8 @@ export default function HomePage() {
     setTransacaoSelecionada(t)
     setFormTipo(t.tipo)
     setFormDescricao(t.descricao)
-    // Converte centavos para formato com vírgula para edição
-    setFormValor((t.valorCentavos / 100).toFixed(2).replace('.', ','))
-    setFormData(new Date(t.dataTransacao).toISOString().split('T')[0])
+    setFormValorCentavos(t.valorCentavos)
+    setFormData(t.dataTransacao.slice(0, 10))
     setFormChaveUnica(t.chaveUnica || '')
     setFormErro('')
     setModalAberto(true)
@@ -113,14 +131,11 @@ export default function HomePage() {
       return
     }
 
-    // Sanitiza e valida o valor em Reais e converte para centavos inteiros
-    const valorNumerico = parseFloat(formValor.replace(/\./g, '').replace(',', '.'))
-    if (isNaN(valorNumerico) || valorNumerico <= 0) {
-      setFormErro('Informe um valor válido e positivo (maior que zero).')
+    const valorCentavos = formValorCentavos
+    if (valorCentavos <= 0) {
+      setFormErro('Informe um valor maior que zero.')
       return
     }
-
-    const valorCentavos = Math.round(valorNumerico * 100)
 
     setSalvando(true)
     try {
@@ -129,7 +144,7 @@ export default function HomePage() {
           tipo: formTipo,
           descricao: formDescricao.trim(),
           valorCentavos,
-          dataTransacao: new Date(formData).toISOString(),
+          dataTransacao: formData,
           chaveUnica: formChaveUnica.trim(),
         })
         setSucesso('Transação cadastrada com sucesso!')
@@ -138,7 +153,7 @@ export default function HomePage() {
           tipo: formTipo,
           descricao: formDescricao.trim(),
           valorCentavos,
-          dataTransacao: new Date(formData).toISOString(),
+          dataTransacao: formData,
         })
         setSucesso('Transação atualizada com sucesso (alteração auditada)!')
       }
@@ -340,7 +355,7 @@ export default function HomePage() {
                   ) : transacoes.map((t) => {
                     const tipoFormatado = (t.tipo || '').toLowerCase()
                     const dataExtenso = t.dataTransacao 
-                      ? new Date(t.dataTransacao).toLocaleDateString('pt-BR') 
+                      ? new Date(t.dataTransacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) 
                       : '-'
 
                     return (
@@ -513,10 +528,11 @@ export default function HomePage() {
                   <label>Valor em Reais (R$)</label>
                   <input
                     type="text"
+                    inputMode="numeric"
                     className="form-input"
-                    placeholder="Ex: 2.000,00"
-                    value={formValor}
-                    onChange={(e) => setFormValor(e.target.value)}
+                    placeholder="0,00"
+                    value={formatarCentavos(formValorCentavos)}
+                    onChange={(e) => setFormValorCentavos(centavosDoTexto(e.target.value))}
                     required
                   />
                   <span className="input-hint">
