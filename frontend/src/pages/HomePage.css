@@ -999,3 +999,33 @@
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+/* ══════════════════════════════════════
+   AJUSTES RESPONSIVOS (MOBILE)
+   ══════════════════════════════════════ */
+
+/* Itens de grid não podem crescer além da coluna (evita rolagem lateral) */
+.content-grid > * { min-width: 0; }
+.trans-meta { flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  .greeting-section { flex-direction: column; gap: 0.5rem; }
+  .greeting-date    { align-self: flex-start; }
+
+  /* Linha da transação: ícone + descrição em cima, valor e ações embaixo */
+  .trans-item    { flex-wrap: wrap; gap: 0.5rem 0.75rem; }
+  .trans-info    { flex-basis: calc(100% - 38px - 0.75rem); }
+  .trans-value   { margin-left: calc(38px + 0.75rem); }
+  .trans-actions { margin-left: auto; }
+
+  .card-header-actions { flex-wrap: wrap; gap: 0.75rem; }
+
+  /* Menu continua acessível no celular: vira uma segunda linha do cabeçalho */
+  .home-root .home-header { flex-wrap: wrap; height: auto; padding: 0.6rem 1rem; gap: 0.4rem 0.75rem; }
+  .home-root .header-brand { flex: 1; }
+  .home-root .header-nav { display: flex; order: 3; flex: 1 1 100%; gap: 0.25rem; overflow-x: auto; }
+
+  /* Rodapé do cartão de saldo empilhado (nome + selo não se sobrepõem) */
+  .card-bottom { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+  .home-footer   { flex-direction: column; gap: 0.25rem; padding: 1rem; text-align: center; }
+}

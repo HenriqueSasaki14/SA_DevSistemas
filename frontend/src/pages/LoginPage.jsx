@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './LoginPage.css'
 import logo from '../assets/2.png'
 import { api } from '../services/api'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/auth'
 
 export default function LoginPage() {
   const { login } = useAuth()

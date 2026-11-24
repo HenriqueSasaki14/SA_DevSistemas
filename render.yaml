@@ -1,0 +1,32 @@
+# Deploy do backend + banco no Render (https://render.com) via Blueprint.
+# Render > New > Blueprint > selecione este repositório. Veja docs/DEPLOY.md.
+databases:
+  - name: safecash-db
+    plan: free
+    databaseName: safecash
+    user: safecash
+
+services:
+  - type: web
+    name: safecash-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    # Aplica as migrations (incluindo os triggers da Regra de Ouro) antes de subir
+    startCommand: npx prisma migrate deploy && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.18.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: safecash-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # Preencha com a URL do frontend publicado na Vercel (ex: https://safecash.vercel.app)
+      - key: CORS_ORIGIN
+        sync: false

@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { AuthContext } from './auth'
 import { api, TOKEN_KEY, SESSAO_EXPIRADA, expiracaoDoToken } from '../services/api'
-
-export const AuthContext = createContext(null)
 
 function tokenValido(token) {
   const exp = token && expiracaoDoToken(token)
@@ -27,7 +26,7 @@ export function AuthProvider({ children }) {
       return
     }
     api.me()
-      .then((data) => setUsuario({ id: data.id, nome: data.nome, email: data.email }))
+      .then((data) => setUsuario({ id: data.id, nome: data.nome, email: data.email, perfil: data.perfil }))
       .catch(() => {})
       .finally(() => setCarregando(false))
   }, [])
@@ -50,7 +49,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem(TOKEN_KEY, novoToken)
     setToken(novoToken)
     const data = await api.me()
-    setUsuario({ id: data.id, nome: data.nome, email: data.email })
+    setUsuario({ id: data.id, nome: data.nome, email: data.email, perfil: data.perfil })
   }
 
   return (
@@ -59,5 +58,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   )
 }
-
-export const useAuth = () => useContext(AuthContext)

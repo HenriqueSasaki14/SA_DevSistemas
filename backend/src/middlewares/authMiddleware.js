@@ -48,7 +48,7 @@ export async function autenticar(req, res, next) {
   try {
     const usuario = await prisma.usuario.findUnique({
       where: { id: decoded.id },
-      select: { id: true, nome: true, email: true, criadoEm: true },
+      select: { id: true, nome: true, email: true, perfil: true, criadoEm: true },
     })
 
     if (!usuario) {
@@ -58,6 +58,20 @@ export async function autenticar(req, res, next) {
     req.usuario = usuario
     next()
   } catch (err) {
-    return res.status(500).json({ erro: 'Falha na autenticação do usuário.', detalhe: err.message })
+    return next(err)
+  }
+}
+
+/**
+ * RBAC: libera a rota apenas para os perfis informados (usar depois de `autenticar`).
+ * O perfil é lido do banco a cada requisição, então uma mudança de perfil vale na hora.
+ * @param {...('ADMIN'|'USUARIO')} perfis
+ */
+export function autorizar(...perfis) {
+  return (req, res, next) => {
+    if (!perfis.includes(req.usuario?.perfil)) {
+      return res.status(403).json({ erro: 'Acesso negado: seu perfil não tem permissão para este recurso.' })
+    }
+    next()
   }
 }

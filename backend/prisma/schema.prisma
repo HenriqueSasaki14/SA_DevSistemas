@@ -15,6 +15,13 @@ enum TipoTransacao {
   SAIDA
 }
 
+// RBAC: ADMIN enxerga a operação inteira (usuários, auditoria global, métricas);
+// USUARIO enxerga somente as próprias transações
+enum PerfilUsuario {
+  ADMIN
+  USUARIO
+}
+
 enum TipoAcaoAuditoria {
   CRIACAO
   EDICAO
@@ -28,6 +35,7 @@ model Usuario {
   senhaHash           String
   cpf                 String?
   telefone            String?
+  perfil              PerfilUsuario @default(USUARIO)
   criadoEm            DateTime     @default(now())
 
   transacoes          Transacao[]  @relation("UsuarioTransacoes")
@@ -50,11 +58,13 @@ model Transacao {
   deletadoEm     DateTime?
   deletadoPorId  Int?
 
-  usuario        Usuario        @relation("UsuarioTransacoes", fields: [usuarioId], references: [id])
-  deletadoPor    Usuario?       @relation("UsuarioExclusoes", fields: [deletadoPorId], references: [id])
+  usuario        Usuario        @relation("UsuarioTransacoes", fields: [usuarioId], references: [id], onDelete: Restrict)
+  deletadoPor    Usuario?       @relation("UsuarioExclusoes", fields: [deletadoPorId], references: [id], onDelete: Restrict)
   auditorias     Auditoria[]
 
   @@unique([usuarioId, chaveUnica], name: "usuario_chave_unica")
+  // Listagem, filtros por período, dashboard e relatórios: sempre por usuário, só ativas, ordenadas por data
+  @@index([usuarioId, deletadoEm, dataTransacao(sort: Desc)])
 }
 
 model Auditoria {
@@ -65,6 +75,12 @@ model Auditoria {
   dataAcao       DateTime           @default(now())
   dadosAlterados Json
 
-  transacao      Transacao          @relation(fields: [transacaoId], references: [id])
-  usuario        Usuario            @relation("UsuarioAuditorias", fields: [usuarioId], references: [id])
+  // Restrict: a trilha de auditoria nunca pode ser apagada em cascata
+  transacao      Transacao          @relation(fields: [transacaoId], references: [id], onDelete: Restrict)
+  usuario        Usuario            @relation("UsuarioAuditorias", fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  // Trilha de uma transação e auditoria global (admin) ordenadas por data
+  @@index([transacaoId, dataAcao(sort: Desc)])
+  @@index([dataAcao(sort: Desc)])
+  @@index([usuarioId])
 }

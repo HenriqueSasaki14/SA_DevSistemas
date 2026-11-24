@@ -1,7 +1,9 @@
 node_modules/
-.env
-*.env*
-banco.db
 dist/
 generated/
+.env
+.env.*
+!.env.example
 .claude/settings.local.json
+test-results/
+playwright-report/
