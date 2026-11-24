@@ -16,3 +16,16 @@ export function centavosDoTexto(texto) {
 export function formatarCentavos(centavos) {
   return (centavos / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
+
+/** Centavos -> "R$ 2.000,00" */
+export function formatarReal(centavos) {
+  return (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+/** Centavos -> rótulo curto de eixo: "R$ 0", "R$ 500", "R$ 2 mil", "R$ 1,5 mi" */
+export function formatarRealCurto(centavos) {
+  const reais = centavos / 100
+  if (Math.abs(reais) >= 1_000_000) return `R$ ${(reais / 1_000_000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
+  if (Math.abs(reais) >= 1_000) return `R$ ${(reais / 1_000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mil`
+  return `R$ ${reais.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
+}

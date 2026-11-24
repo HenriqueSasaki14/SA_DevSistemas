@@ -1,55 +1,69 @@
 # SafeCash – Sistema de Tesouraria Integrada (FinTech Flow)
 
-> **Situação de Aprendizagem – Desenvolvimento de Sistemas | Prof. Willer Barros**  
-> Core Engine financeiro fullstack para controle de fluxo de caixa, integridade bancária e rastreabilidade com auditoria completa.
+> **Situação de Aprendizagem – Desenvolvimento de Sistemas | Prof. Willer Barros**
+> Core Engine financeiro fullstack para controle de fluxo de caixa, com integridade bancária e rastreabilidade por auditoria completa.
 
-### Integrantes
+### Integrantes – Grupo 1
 
-| Nome | GitHub |
+| Nome | Papel |
 | :--- | :--- |
-| _preencher_ | _@usuario_ |
-| _preencher_ | _@usuario_ |
-| _preencher_ | _@usuario_ |
-| _preencher_ | _@usuario_ |
+| Gustavo Nobre | Back-end |
+| Guilherme Weiss Rodrigues da Silva | Back-end |
+| Henrique Sasaki Tannous | Front-end |
+| Cleyton Rodrigues Pedroza | Front-end |
+| Guilherme Coimbra Bruno | Front-end |
+| Victor Morsoletto de Oliveira | Arquiteto |
+
+📋 **Quadro de tarefas (Trello):** _colar aqui o link do quadro_
+🎬 **Vídeo de demonstração:** _colar aqui o link do vídeo_
 
 ---
 
-## 1. Visão Geral do Projeto
+## 1. Visão Geral
 
-A **SafeCash** é uma plataforma de gestão de tesouraria desenvolvida para pequenas empresas e startups gerenciarem entradas e saídas de caixa com precisão bancária. O sistema soluciona problemas críticos de integridade de dados através de:
-- **Autenticação Segura**: Criptografia de senhas com **Bcrypt** e sessões stateless via **JWT (JSON Web Token)**.
-- **Precisão Bancária**: Valores armazenados como **centavos inteiros positivos** (`Int`), eliminando erros de arredondamento de ponto flutuante.
-- **Prevenção de Duplicidade**: Chave única por usuário (`chaveUnica`) garantindo idempotência e evitando lançamentos duplicados por duplo clique ou reenvio acidental.
-- **Regra de Ouro (H1 - Soft Delete)**: Proibição estrita de exclusão física de registros; toda exclusão é lógica, marcando a data e o usuário responsável. A regra é garantida **também pelo banco** (triggers), não só pela API.
-- **Trilha de Auditoria Contínua**: Registro imutável (append-only) de criação, edição e exclusão de qualquer transação com o diff das alterações e autoria.
-- **Validação de Esquemas (Zod)**: Todo corpo de requisição é validado por schema antes de chegar às regras de negócio (valores negativos, decimais, tipos errados e campos desconhecidos são recusados).
-- **Cálculo Consolidado Centralizado**: O frontend não calcula saldos; exibe os totais consolidados e formatados pela API REST.
+A **SafeCash** é uma plataforma de tesouraria para pequenas empresas controlarem entradas e saídas de caixa com precisão bancária:
 
----
+- **Precisão bancária:** valores guardados como **centavos inteiros** (R$ 2.000,00 = `200000`), sem erro de arredondamento.
+- **Regra de Ouro (H1):** nenhuma exclusão física. Toda exclusão é lógica (Soft Delete), registrando data e responsável, e o próprio banco bloqueia `DELETE` por trigger.
+- **Auditoria imutável:** criação, edição (com o diff "antes/depois") e exclusão de cada transação ficam registradas com autor e data.
+- **Sem duplicidade:** chave única por usuário (`chaveUnica`) impede o mesmo lançamento duas vezes (duplo clique, reenvio).
+- **Validação de schema (Zod):** recusa valores negativos, decimais, tipos errados e campos desconhecidos.
+- **Saldo em tempo real:** calculado pela API e atualizado no dashboard após cada operação.
+- **Busca, filtros e paginação**, **gráfico mensal**, **extrato em CSV**.
+- **Perfis de acesso (RBAC):** ADMIN e USUÁRIO, com área administrativa.
+- **Documentação interativa (Swagger)** e **métricas de desempenho** da API.
 
-## 2. Justificativa da Stack Tecnológica (H2, H3, H4)
+## 2. Justificativa da Stack (H2, H3, H4)
 
-A SafeCash precisa atender pequenas empresas **no computador e no celular**, com uma equipe pequena e prazo curto. O **JavaScript Fullstack (Node.js + React)** foi escolhido por estes motivos:
+A SafeCash precisa atender pequenas empresas **no computador e no celular**, com uma equipe pequena e prazo curto. Por isso, **JavaScript Fullstack (Node.js + React)**:
 
 **Multiplataforma**
-- **Uma linguagem só, do servidor ao navegador**: a mesma equipe mantém backend e frontend, sem trocar de linguagem nem duplicar conhecimento. Regras como "valor em centavos inteiros" são escritas uma vez e entendidas pelos dois lados.
-- **Web e mobile com o mesmo código**: o React gera uma interface responsiva que roda em qualquer navegador (desktop, tablet, celular), sem instalar nada. Se a SafeCash quiser um app nativo no futuro, o **React Native** reaproveita componentes, lógica e a mesma API REST.
-- **API REST em JSON**: o formato nativo do JavaScript. Qualquer cliente (web, app, parceiro) consome a API sem conversões.
+- **Uma linguagem do servidor ao navegador:** a mesma equipe mantém backend e frontend. Regras como "valor em centavos inteiros" são entendidas igual pelos dois lados.
+- **Web e mobile com o mesmo código:** o React gera uma interface responsiva que roda em qualquer navegador, sem instalar nada. Um app nativo futuro pode usar **React Native**, reaproveitando lógica e a mesma API REST.
+- **API REST em JSON**, o formato nativo do JavaScript: qualquer cliente (web, app, parceiro) consome a API sem conversões.
 
 **Requisitos técnicos**
-- **Node.js + Express**: I/O não bloqueante, adequado a muitas requisições curtas e simultâneas (consultas de saldo, lançamentos). O Express 5 encaminha erros de funções `async` direto para um tratador central.
-- **Prisma ORM + PostgreSQL**: banco relacional com transações ACID (`$transaction`) — a transação e o seu registro de auditoria são gravados juntos ou não são gravados. Migrations versionadas e triggers garantem a Regra de Ouro no próprio banco.
-- **Zod**: validação declarativa de schemas, cumprindo o requisito de segurança de dados.
-- **Bcrypt + JWT**: hash de senhas com salt e autenticação stateless com expiração configurável.
+- **Node.js + Express 5:** I/O não bloqueante, adequado a muitas requisições curtas e simultâneas (consultas de saldo, lançamentos).
+- **Prisma ORM + PostgreSQL:** banco relacional com transações ACID (`$transaction`): a transação e o seu registro de auditoria são gravados juntos ou não são gravados. Migrations versionadas, índices e triggers.
+- **Zod:** validação declarativa de schemas.
+- **Bcrypt + JWT:** hash de senhas com salt e autenticação stateless com expiração.
 
-**Mercado**
-- O ecossistema npm é o maior do mundo e o JavaScript Fullstack é amplamente adotado pelas empresas de tecnologia da Grande Florianópolis, o que facilita contratação e manutenção.
+**Mercado:** o ecossistema npm é o maior do mundo e o JavaScript Fullstack é amplamente usado pelas empresas de tecnologia da Grande Florianópolis.
 
----
+## 3. Documentação Técnica
 
-## 3. Arquitetura do Banco de Dados
+| Documento | Conteúdo |
+| :-- | :-- |
+| [`docs/REQUISITOS.md`](docs/REQUISITOS.md) | Requisitos funcionais e não funcionais |
+| [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | Camadas, fluxo de dados, segurança e RBAC, fluxos de navegação, índices e métricas |
+| [`docs/TESTES.md`](docs/TESTES.md) | Estratégia de testes (unitários e e2e) |
+| [`docs/UX.md`](docs/UX.md) | Padrões de UX/UI e checklist de homologação |
+| [`docs/DEPLOY.md`](docs/DEPLOY.md) | Build e deploy (Vercel + Render) |
+| **Swagger** | `http://localhost:3001/api/docs` (com o backend rodando) |
 
-O banco relacional possui as **três entidades fundamentais** modeladas no Prisma ([`backend/prisma/schema.prisma`](backend/prisma/schema.prisma)):
+## 4. Banco de Dados
+
+Modelo em [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma):
 
 ```mermaid
 erDiagram
@@ -65,6 +79,7 @@ erDiagram
         string senhaHash
         string cpf
         string telefone
+        PerfilUsuario perfil "ADMIN | USUARIO"
         datetime criadoEm
     }
 
@@ -73,9 +88,9 @@ erDiagram
         int usuarioId FK
         TipoTransacao tipo "ENTRADA | SAIDA"
         string descricao
-        int valorCentavos "Guardado em centavos (ex: 200000)"
+        int valorCentavos "ex: 200000 = R$ 2.000,00"
         datetime dataTransacao
-        string chaveUnica "Chave de Idempotencia"
+        string chaveUnica "Idempotencia"
         datetime criadoEm
         datetime atualizadoEm
         datetime deletadoEm "Soft Delete"
@@ -88,191 +103,121 @@ erDiagram
         int usuarioId FK
         TipoAcaoAuditoria tipoAcao "CRIACAO | EDICAO | EXCLUSAO"
         datetime dataAcao
-        json dadosAlterados "Diff detalhado das alteracoes"
+        json dadosAlterados "Diff antes/depois"
     }
 ```
 
-### 3.1. Rastreabilidade: quem criou e quem alterou
+### Rastreabilidade: quem criou e quem alterou
 
 | Pergunta | Onde está a resposta |
 | :--- | :--- |
-| Quem criou a transação e quando? | `Transacao.usuarioId` + `Transacao.criadoEm` e a entrada `CRIACAO` da `Auditoria` |
-| Quem alterou, quando e o quê? | Entradas `EDICAO` da `Auditoria` (`usuarioId`, `dataAcao`, diff `antes/depois`) e `Transacao.atualizadoEm` |
-| Quem excluiu e quando? | `Transacao.deletadoPorId` + `Transacao.deletadoEm` e a entrada `EXCLUSAO` da `Auditoria` |
+| Quem criou a transação e quando? | `Transacao.usuarioId` + `criadoEm` e a entrada `CRIACAO` da `Auditoria` |
+| Quem alterou, quando e o quê? | Entradas `EDICAO` da `Auditoria` (`usuarioId`, `dataAcao`, diff) e `Transacao.atualizadoEm` |
+| Quem excluiu e quando? | `Transacao.deletadoPorId` + `deletadoEm` e a entrada `EXCLUSAO` da `Auditoria` |
 
-### 3.2. Regra de Ouro garantida no banco
+### Regra de Ouro garantida no banco
 
-A migration inicial ([`backend/prisma/migrations`](backend/prisma/migrations)) cria triggers no PostgreSQL. Mesmo com SQL manual, fora da API:
-
-| Tentativa | Resultado |
+| Tentativa (mesmo por SQL direto) | Resultado |
 | :--- | :--- |
-| `DELETE FROM "Transacao"` | **Bloqueado** – exclusão física proibida |
-| Alterar ou "ressuscitar" uma transação já excluída | **Bloqueado** – registro excluído fica congelado |
-| `UPDATE` ou `DELETE` em `"Auditoria"` | **Bloqueado** – auditoria é somente inserção |
+| `DELETE FROM "Transacao"` | **Bloqueado** por trigger |
+| Alterar ou "ressuscitar" uma transação já excluída | **Bloqueado** por trigger |
+| `UPDATE` ou `DELETE` em `"Auditoria"` | **Bloqueado** por trigger (append-only) |
 
-Além disso, todas as chaves estrangeiras usam `ON DELETE RESTRICT`: nada é apagado em cascata.
+Todas as chaves estrangeiras usam `ON DELETE RESTRICT`: nada é apagado em cascata.
 
----
+## 5. Rotas da API REST (H6, H10)
 
-## 4. Documentação das Rotas da API REST (H6, H10)
+A documentação completa e interativa (com exemplos e "Try it out") está no **Swagger: `/api/docs`**. Resumo:
 
-Todas as rotas (exceto registro e login) exigem o header:
-`Authorization: Bearer <token_jwt>`
+Rotas protegidas exigem `Authorization: Bearer <token>`.
 
-**Formato dos erros** (toda resposta de erro segue este padrão):
+| Método | Rota | Descrição | Perfil |
+| :--- | :--- | :--- | :--- |
+| POST | `/api/auth/register` | Cadastro (o 1º usuário do sistema vira ADMIN) | público |
+| POST | `/api/auth/login` | Login, retorna o JWT | público |
+| GET | `/api/me` | Usuário logado | logado |
+| GET | `/api/transacoes` | Lista com **filtros, busca, ordenação e paginação** | logado |
+| GET | `/api/transacoes/:id` | Detalhe | logado |
+| POST | `/api/transacoes` | Cria (idempotente) + auditoria `CRIACAO` | logado |
+| PUT | `/api/transacoes/:id` | Edita + auditoria `EDICAO` com diff | logado |
+| DELETE | `/api/transacoes/:id` | **Soft Delete** + auditoria `EXCLUSAO` | logado |
+| GET | `/api/transacoes/:id/auditoria` | Trilha da transação (inclusive excluídas) | logado |
+| GET | `/api/dashboard` | Saldo, entradas e saídas consolidados | logado |
+| GET | `/api/relatorios/mensal` | Entradas × saídas por mês | logado |
+| GET | `/api/relatorios/extrato` | Extrato com saldo acumulado (JSON ou CSV) | logado |
+| GET | `/api/admin/dashboard` | Totais de toda a empresa | ADMIN |
+| GET | `/api/admin/usuarios` | Usuários (paginado, com busca) | ADMIN |
+| PATCH | `/api/admin/usuarios/:id/perfil` | Promove ou rebaixa usuário | ADMIN |
+| GET | `/api/admin/auditoria` | Auditoria global (paginada) | ADMIN |
+| GET | `/api/admin/metricas` | Desempenho por rota | ADMIN |
+| GET | `/api/health` | Verificação de saúde | público |
+
+### Exemplo: criar a transação do enunciado
+
+```http
+POST /api/transacoes
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "tipo": "SAIDA",
+  "descricao": "Pagamento de Aluguel",
+  "valorCentavos": 200000,
+  "dataTransacao": "2026-11-22",
+  "chaveUnica": "TX-1763850000-ALUGUEL"
+}
+```
+
+| Campo | Regra |
+| :--- | :--- |
+| `tipo` | Obrigatório. `ENTRADA` ou `SAIDA` |
+| `descricao` | Obrigatório. 1 a 255 caracteres |
+| `valorCentavos` | Obrigatório. **Inteiro > 0** e ≤ 2.147.483.647. Recusa negativos, zero, decimais, strings e booleanos |
+| `dataTransacao` | Opcional (padrão: agora). `AAAA-MM-DD` ou ISO 8601 |
+| `chaveUnica` | Opcional (gerada automaticamente). Repetida para o mesmo usuário → **409** |
+
+### Exemplo: listagem filtrada
+
+```http
+GET /api/transacoes?busca=aluguel&tipo=SAIDA&dataInicio=2026-11-01&dataFim=2026-11-30&ordenarPor=valorCentavos&ordem=desc&pagina=1&limite=10
+```
+
 ```json
 {
-  "erro": "O valor da transação deve ser maior que zero. Valores negativos não são permitidos.",
-  "erros": [{ "campo": "valorCentavos", "mensagem": "..." }]
+  "dados": [{ "id": 1, "descricao": "Pagamento de Aluguel", "valorCentavos": 200000, "valorFormatado": "R$ 2.000,00", "...": "..." }],
+  "paginacao": { "pagina": 1, "limite": 10, "total": 1, "totalPaginas": 1 }
 }
+```
+
+### Formato dos erros
+
+```json
+{ "erro": "O valor da transação deve ser maior que zero.", "erros": [{ "campo": "valorCentavos", "mensagem": "..." }] }
 ```
 
 | Status | Quando |
 | :---: | :--- |
 | 400 | Dados inválidos (schema), ID inválido, JSON malformado |
 | 401 | Token ausente, inválido ou expirado; login incorreto |
+| 403 | Perfil sem permissão (RBAC) |
 | 404 | Transação inexistente, excluída ou de outro usuário |
 | 409 | `chaveUnica` repetida ou e-mail já cadastrado |
-| 500 | Erro interno (detalhes ficam só no log do servidor) |
+| 500 | Erro interno (detalhes só no log do servidor) |
 
-### 4.1. Autenticação
-
-#### `POST /api/auth/register`
-Cadastra um novo usuário criptografando a senha com `bcrypt` (10 rounds).
-Regras: `nome` com 3+ caracteres, `email` válido (único, retorna **409** se repetido), `senha` com 6+ caracteres. `cpf` e `telefone` são opcionais.
-- **Body:**
-  ```json
-  {
-    "nome": "Empresa Alfa",
-    "email": "contato@empresaalfa.com",
-    "senha": "senhaSegura123",
-    "cpf": "123.456.789-00",
-    "telefone": "(48) 99999-9999"
-  }
-  ```
-- **Resposta (201):**
-  ```json
-  {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "usuario": { "id": 1, "nome": "Empresa Alfa", "email": "contato@empresaalfa.com" }
-  }
-  ```
-
-#### `POST /api/auth/login`
-Autentica o usuário comparando a senha via `bcrypt.compare`.
-- **Body:**
-  ```json
-  {
-    "email": "contato@empresaalfa.com",
-    "senha": "senhaSegura123"
-  }
-  ```
-- **Resposta (200):** Retorna o JWT e os dados do usuário. Credenciais erradas retornam **401**.
-
-#### `GET /api/me`
-Retorna os dados da sessão do usuário autenticado.
-
----
-
-### 4.2. Transações e Tesouraria
-
-#### `GET /api/transacoes`
-Lista todas as transações ativas do usuário logado (exclui automaticamente registros com soft delete).
-
-#### `GET /api/transacoes/:id`
-Retorna uma transação ativa do usuário (404 se não existir ou estiver excluída).
-
-#### `POST /api/transacoes`
-Cria um novo lançamento com validação estrita de centavos inteiros e prevenção de duplicidade.
-
-| Campo | Regra |
-| :--- | :--- |
-| `tipo` | Obrigatório. `ENTRADA` ou `SAIDA` |
-| `descricao` | Obrigatório. 1 a 255 caracteres |
-| `valorCentavos` | Obrigatório. **Número inteiro > 0** e ≤ 2.147.483.647 (R$ 21.474.836,47). Recusa negativos, zero, decimais, strings e booleanos |
-| `dataTransacao` | Opcional (padrão: agora). `AAAA-MM-DD` ou ISO 8601 |
-| `chaveUnica` | Opcional (gerada automaticamente). Até 100 caracteres |
-
-Campos não listados (ex: `usuarioId`, `deletadoEm`) são **recusados** com 400.
-
-- **Body:**
-  ```json
-  {
-    "tipo": "SAIDA",
-    "descricao": "Pagamento de Aluguel",
-    "valorCentavos": 200000,
-    "dataTransacao": "2026-11-22T00:00:00.000Z",
-    "chaveUnica": "TX-1763850000-ALUGUEL"
-  }
-  ```
-- **Idempotência (409 Conflict):** Se a mesma `chaveUnica` for reenviada para o mesmo usuário, a API recusa a duplicação.
-- **Auditoria Automática:** Registra uma entrada com `tipoAcao: 'CRIACAO'` na tabela `Auditoria`.
-
-#### `PUT /api/transacoes/:id`
-Edita um lançamento e gera uma entrada na trilha de auditoria (`tipoAcao: 'EDICAO'`) contendo o diff dos dados alterados.
-Aceita qualquer combinação de `tipo`, `descricao`, `valorCentavos` e `dataTransacao` (mesmas regras do POST; ao menos um campo). A `chaveUnica` não pode ser alterada. Se nada mudar, nenhuma auditoria é gravada.
-
-#### `DELETE /api/transacoes/:id`
-Executa o **Soft Delete** (Regra de Ouro):
-- Atualiza `deletadoEm = new Date()` e `deletadoPorId = req.usuario.id`.
-- O registro **nunca é apagado** do banco de dados.
-- Registra `tipoAcao: 'EXCLUSAO'` na tabela `Auditoria`.
-
-#### `GET /api/transacoes/:id/auditoria`
-Retorna toda a trilha de auditoria da transação (quem alterou, data e o diff detalhado), **inclusive de transações já excluídas**.
-
----
-
-### 4.3. Dashboard Consolidado
-
-#### `GET /api/dashboard`
-Retorna os totais consolidados calculados diretamente pela API:
-- **Resposta (200):**
-  ```json
-  {
-    "saldoTotalCentavos": 300000,
-    "receitasCentavos": 500000,
-    "despesasCentavos": 200000,
-    "totalTransacoesAtivas": 5,
-    "saldoTotal": "R$ 3.000,00",
-    "receitas": "R$ 5.000,00",
-    "despesas": "R$ 2.000,00"
-  }
-  ```
-
----
-
-## 5. Metodologia Ágil e Cronograma de Sprints (H8)
-
-📋 **Quadro do projeto (GitHub Projects):** _colar aqui o link do quadro_
-
-O ciclo de desenvolvimento foi organizado em 5 sprints incrementais:
-
-| Sprint | Escopo Principal | Entregáveis |
-| :---: | :--- | :--- |
-| **Sprint 1** | Modelagem Relacional & Prisma | Schema com 3 entidades (`Usuario`, `Transacao`, `Auditoria`), centavos inteiros e migrations. |
-| **Sprint 2** | Regras de Negócio & Segurança | Bcrypt, JWT, validação de valores positivos, prevenção de duplicidade e soft delete. |
-| **Sprint 3** | API REST & Serviços | Endpoints de CRUD, cálculo de saldo consolidado e gravação de auditoria em `$transaction`. |
-| **Sprint 4** | Frontend React & Experiência | Dashboard reativo, modais de cadastro/edição, máscara de R$, confirmação de exclusão e visualizador de auditoria. |
-| **Sprint 5** | Limpeza, Auditoria & E2E | Remoção de arquivos legados, validação ponta a ponta e documentação técnica completa. |
-
----
-
-## 6. Como Executar o Projeto
+## 6. Como Executar
 
 ### Pré-requisitos
 - **Node.js 22.18 ou superior** (o backend importa o Prisma Client gerado em TypeScript, recurso nativo do Node a partir dessa versão)
-- PostgreSQL rodando localmente ou via nuvem (Neon / Supabase / Render / Railway)
+- **PostgreSQL** local ou em nuvem (Neon, Supabase, Render, Railway)
 
-### Passo a Passo
+### Passo a passo
 
-1. **Instalar Dependências:**
+1. **Instalar as dependências** (o Prisma Client é gerado automaticamente):
    ```bash
    npm run install:all
    ```
 
-2. **Configurar as Variáveis de Ambiente:**
-   Copie `backend/.env.example` para `backend/.env` e ajuste os valores:
+2. **Configurar o ambiente:** copie `backend/.env.example` para `backend/.env` e ajuste:
    ```env
    PORT=3001
    DATABASE_URL=postgres://postgres:postgres@localhost:5432/safecash
@@ -281,48 +226,74 @@ O ciclo de desenvolvimento foi organizado em 5 sprints incrementais:
    CORS_ORIGIN=http://localhost:5173
    ```
 
-3. **Criar as tabelas no banco (migrations):**
+3. **Criar as tabelas, índices e triggers:**
    ```bash
    npm run db:migrate --prefix backend
    ```
-   O Prisma Client é gerado automaticamente no `npm install` (script `postinstall`).
 
-4. **Iniciar Aplicação (Backend + Frontend):**
+4. **Iniciar backend + frontend:**
    ```bash
    npm run dev
    ```
-   - Frontend: `http://localhost:5173`
-   - Backend API: `http://localhost:3001`
+   - Frontend: http://localhost:5173
+   - API: http://localhost:3001 · Swagger: http://localhost:3001/api/docs
 
-5. **Rodar os testes automatizados do backend:**
-   ```bash
-   npm test --prefix backend
-   ```
+   > O **primeiro usuário cadastrado** vira **ADMIN** e vê o menu "Administração".
 
----
+### Scripts
 
-## 7. Estrutura do Projeto
+| Comando (na raiz) | O que faz |
+| :--- | :--- |
+| `npm run dev` | Backend + frontend em modo desenvolvimento |
+| `npm test` | Testes unitários do backend |
+| `npm run test:e2e` | Testes e2e no navegador (ver [`docs/TESTES.md`](docs/TESTES.md)) |
+| `npm run lint` | ESLint do frontend |
+| `npm run build` | Build de produção do frontend |
+
+## 7. Etapas da S.A. (planilha) → onde estão
+
+| Etapa | Backend | Frontend | Arquiteto |
+| :-: | :-- | :-- | :-- |
+| 1 | Projeto Node (`backend/`) | React + Vite (`frontend/`) | [`docs/REQUISITOS.md`](docs/REQUISITOS.md) |
+| 2 | Pastas em camadas (seção 8) | Logo (`frontend/src/assets`) | Quadro no Trello (link no topo) |
+| 3 | GET, POST, PUT de transações | Consumo em `services/api.js` | — |
+| 4 | JWT (`authMiddleware.js`) | Login com autenticação | Fluxo de dados em [`ARQUITETURA.md`](docs/ARQUITETURA.md#2-fluxo-de-dados-de-uma-criação-etapa-4--validação-do-fluxo) |
+| 5 | Rotas protegidas, `autenticar` + `autorizar` | Dashboard | Segurança e RBAC em [`ARQUITETURA.md`](docs/ARQUITETURA.md#3-critérios-de-segurança-e-rbac-etapa-5) |
+| 6 | `/api/dashboard`, `/api/relatorios/mensal` (agregações) | Gráfico mensal (`GraficoMensal.jsx`) | Fluxos de navegação em [`ARQUITETURA.md`](docs/ARQUITETURA.md#4-fluxos-de-navegação-etapa-6) |
+| 7 | Filtros, paginação e busca em `GET /api/transacoes` | `FiltrosTransacoes`, `TabelaTransacoes`, `Paginacao` | Desempenho e métricas em [`ARQUITETURA.md`](docs/ARQUITETURA.md#5-modelagem-de-desempenho-das-consultas-e-métricas-etapas-7-e-9) |
+| 8 | `errorHandler` central + Zod | Toasts, skeletons, modais de erro | [`docs/UX.md`](docs/UX.md) |
+| 9 | Índices + relatório de extrato (JSON/CSV) | `memo`/`useMemo`/`useCallback`, debounce, responsivo | [`docs/TESTES.md`](docs/TESTES.md) |
+| 10 | `npm run build`, `render.yaml` | `vercel.json`, build de produção | Swagger (`/api/docs`) + [`docs/DEPLOY.md`](docs/DEPLOY.md) |
+| 11 | Vídeo de demonstração (link no topo) | | |
+
+## 8. Estrutura do Projeto
 
 ```
 backend/
 ├── prisma/
-│   ├── schema.prisma            # Modelo relacional (Usuario, Transacao, Auditoria)
-│   └── migrations/              # Migration inicial + triggers da Regra de Ouro
+│   ├── schema.prisma             # Usuario, Transacao, Auditoria, perfis, índices
+│   └── migrations/               # Tabelas + triggers da Regra de Ouro + RBAC/índices
 ├── src/
-│   ├── server.js                # Inicialização do servidor
-│   ├── app.js                   # Configuração do Express (CORS, JSON, rotas, erros)
-│   ├── routes/                  # authRoutes, transacaoRoutes
-│   ├── validators/schemas.js    # Schemas Zod (validação de entrada)
-│   ├── services/                # Regras de negócio (auth, transações, auditoria)
-│   ├── middlewares/             # autenticação JWT e tratamento central de erros
-│   ├── errors/AppError.js       # Erro de negócio com status HTTP
-│   ├── utils/moeda.js           # Formatação de centavos em R$
-│   └── lib/prisma.ts            # Instância do Prisma Client
-└── test/                        # Testes (node:test)
-frontend/
-└── src/
-    ├── pages/                   # Login, Cadastro, Dashboard
-    ├── contexts/                # Sessão do usuário (JWT)
-    ├── services/api.js          # Cliente da API REST
-    └── utils/moeda.js           # Máscara de valor em R$
+│   ├── server.js                 # Inicialização
+│   ├── app.js                    # Express: CORS, JSON, métricas, Swagger, rotas, erros
+│   ├── routes/                   # auth, transacoes, dashboard/relatorios, admin
+│   ├── validators/schemas.js     # Schemas Zod (body e query string)
+│   ├── services/                 # Regras de negócio
+│   ├── middlewares/              # JWT, RBAC, métricas, tratamento de erros
+│   ├── docs/openapi.js           # Especificação Swagger/OpenAPI
+│   ├── errors/  utils/  lib/
+└── test/                         # Testes unitários (node:test)
+frontend/src/
+├── pages/                        # Login, Cadastro, Dashboard, Administração
+├── components/
+│   ├── layout/                   # Header, Footer
+│   ├── dashboard/                # GraficoMensal
+│   ├── transacoes/               # Filtros, Tabela, Modais, ListaAuditoria
+│   └── ui/                       # Modal, Paginacao, CampoMoeda, Skeleton
+├── contexts/                     # Sessão (JWT) e Toasts
+├── hooks/                        # useRequisicao, useDebounce
+├── services/api.js               # Cliente da API REST
+└── utils/                        # Moeda e datas
+e2e/                              # Testes ponta a ponta (Playwright)
+docs/                             # Requisitos, arquitetura, testes, UX, deploy
 ```

@@ -69,3 +69,65 @@ export const loginSchema = z.object({
   email: z.string({ error: 'O e-mail é obrigatório.' }).trim().toLowerCase().min(1, 'O e-mail é obrigatório.'),
   senha: z.string({ error: 'A senha é obrigatória.' }).min(1, 'A senha é obrigatória.'),
 })
+
+// ─── Filtros, paginação e busca (query string) ───────────────────
+
+const dataSimples = z.iso.date({ error: 'Data inválida. Use o formato AAAA-MM-DD.' })
+
+const paginacao = {
+  pagina: z.coerce.number().int().min(1, 'A página deve ser maior ou igual a 1.').default(1),
+  limite: z.coerce.number().int().min(1).max(100, 'O limite máximo por página é 100.').default(10),
+}
+
+export const filtrosTransacaoSchema = z
+  .object({
+    ...paginacao,
+    tipo: tipoTransacao.optional(),
+    busca: z.string().trim().max(100).optional().transform((v) => v || undefined),
+    dataInicio: dataSimples.optional(),
+    dataFim: dataSimples.optional(),
+    valorMin: z.coerce.number().int().min(0).optional(),
+    valorMax: z.coerce.number().int().min(0).optional(),
+    ordenarPor: z.enum(['dataTransacao', 'valorCentavos', 'descricao', 'criadoEm']).default('dataTransacao'),
+    ordem: z.enum(['asc', 'desc']).default('desc'),
+  })
+  .refine((f) => !f.dataInicio || !f.dataFim || f.dataInicio <= f.dataFim, {
+    message: 'A data inicial não pode ser maior que a data final.',
+    path: ['dataInicio'],
+  })
+  .refine((f) => f.valorMin === undefined || f.valorMax === undefined || f.valorMin <= f.valorMax, {
+    message: 'O valor mínimo não pode ser maior que o valor máximo.',
+    path: ['valorMin'],
+  })
+
+export const relatorioMensalSchema = z.object({
+  meses: z.coerce.number().int().min(1).max(24, 'O relatório mensal aceita no máximo 24 meses.').default(6),
+})
+
+export const extratoSchema = z
+  .object({
+    dataInicio: dataSimples,
+    dataFim: dataSimples,
+    formato: z.enum(['json', 'csv']).default('json'),
+  })
+  .refine((f) => f.dataInicio <= f.dataFim, {
+    message: 'A data inicial não pode ser maior que a data final.',
+    path: ['dataInicio'],
+  })
+
+// ─── Administração (RBAC) ────────────────────────────────────────
+
+export const listarUsuariosSchema = z.object({
+  ...paginacao,
+  busca: z.string().trim().max(100).optional().transform((v) => v || undefined),
+})
+
+export const alterarPerfilSchema = z.strictObject({
+  perfil: z.enum(['ADMIN', 'USUARIO'], { error: 'Perfil inválido. Deve ser ADMIN ou USUARIO.' }),
+})
+
+export const auditoriaGlobalSchema = z.object({
+  ...paginacao,
+  tipoAcao: z.enum(['CRIACAO', 'EDICAO', 'EXCLUSAO']).optional(),
+  usuarioId: z.coerce.number().int().positive().optional(),
+})

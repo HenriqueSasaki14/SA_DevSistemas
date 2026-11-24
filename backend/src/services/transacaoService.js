@@ -3,6 +3,8 @@ import { prisma } from '../lib/prisma.ts'
 import { AppError } from '../errors/AppError.js'
 import { formatarCentavosParaReal } from '../utils/moeda.js'
 import { registrarAuditoria } from './auditoriaService.js'
+import { montarPaginacao, paraPrisma } from '../utils/paginacao.js'
+import { fimDoDiaExclusivo, inicioDoDia } from '../utils/datas.js'
 
 /** Adiciona o valor formatado em R$ à transação devolvida pela API. */
 function comValorFormatado(transacao) {
@@ -72,13 +74,45 @@ export async function criarTransacao(usuarioId, { tipo, descricao, valorCentavos
   }
 }
 
-/** Lista as transações ativas (excluídas logicamente não aparecem). */
-export async function listarTransacoesAtivas(usuarioId) {
-  const transacoes = await prisma.transacao.findMany({
-    where: { usuarioId, deletadoEm: null },
-    orderBy: [{ dataTransacao: 'desc' }, { id: 'desc' }],
-  })
-  return transacoes.map(comValorFormatado)
+/** Converte os filtros da query string em um `where` do Prisma (sempre só as ativas do usuário). */
+export function montarFiltroTransacoes(usuarioId, { tipo, busca, dataInicio, dataFim, valorMin, valorMax }) {
+  const where = { usuarioId, deletadoEm: null }
+
+  if (tipo) where.tipo = tipo
+  if (busca) where.descricao = { contains: busca, mode: 'insensitive' }
+
+  if (dataInicio || dataFim) {
+    where.dataTransacao = {}
+    if (dataInicio) where.dataTransacao.gte = inicioDoDia(dataInicio)
+    if (dataFim) where.dataTransacao.lt = fimDoDiaExclusivo(dataFim)
+  }
+
+  if (valorMin !== undefined || valorMax !== undefined) {
+    where.valorCentavos = {}
+    if (valorMin !== undefined) where.valorCentavos.gte = valorMin
+    if (valorMax !== undefined) where.valorCentavos.lte = valorMax
+  }
+
+  return where
+}
+
+/**
+ * Lista as transações ativas com filtros, busca, ordenação e paginação.
+ * Excluídas logicamente nunca aparecem.
+ */
+export async function listarTransacoes(usuarioId, filtros) {
+  const where = montarFiltroTransacoes(usuarioId, filtros)
+
+  const [transacoes, total] = await Promise.all([
+    prisma.transacao.findMany({
+      where,
+      orderBy: [{ [filtros.ordenarPor]: filtros.ordem }, { id: filtros.ordem }],
+      ...paraPrisma(filtros),
+    }),
+    prisma.transacao.count({ where }),
+  ])
+
+  return { dados: transacoes.map(comValorFormatado), paginacao: montarPaginacao(filtros, total) }
 }
 
 /** Busca uma transação ativa do usuário ou lança 404. */

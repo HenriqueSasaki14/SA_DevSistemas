@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
       return
     }
     api.me()
-      .then((data) => setUsuario({ id: data.id, nome: data.nome, email: data.email }))
+      .then((data) => setUsuario({ id: data.id, nome: data.nome, email: data.email, perfil: data.perfil }))
       .catch(() => {})
       .finally(() => setCarregando(false))
   }, [])
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem(TOKEN_KEY, novoToken)
     setToken(novoToken)
     const data = await api.me()
-    setUsuario({ id: data.id, nome: data.nome, email: data.email })
+    setUsuario({ id: data.id, nome: data.nome, email: data.email, perfil: data.perfil })
   }
 
   return (

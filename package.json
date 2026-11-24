@@ -5,9 +5,17 @@
     "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
     "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "backend": "npm run dev --prefix backend",
-    "frontend": "npm run dev --prefix frontend"
+    "frontend": "npm run dev --prefix frontend",
+    "test": "npm test --prefix backend",
+    "test:e2e": "playwright test",
+    "lint": "npm run lint --prefix frontend",
+    "build": "npm run build --prefix frontend"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=22.18.0"
   }
 }
